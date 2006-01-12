@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>PEAR_Command_Packaging</name>
+ <channel>pear.php.net</channel>
+ <summary>make-rpm-spec command for managing RPM .spec files for PEAR packages</summary>
+ <description>
+  This command is an advanced implementation of the standard makerpm command,
+  and contains several enhancements that make it far more flexible.
+  
+  [**Tim fill in features here**]
+ </description>
+ <lead>
+  <name>Tim Jackson</name>
+  <user>timj</user>
+  <email>timj@php.net</email>
+  <active>yes</active>
+ </lead>
+ <helper>
+  <name>Greg Beaver</name>
+  <user>cellog</user>
+  <email>cellog@php.net</email>
+  <active>yes</active>
+ </helper>
+ <date>2006-01-11</date>
+ <version>
+  <release>0.l.0</release>
+  <api>0.1.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP License</license>
+ <notes>
+  Initial release
+ </notes>
+ <contents>
+  <dir name="/" baseinstalldir="PEAR/Command">
+   <file name="Packaging.xml" role="php"/>
+   <file name="Packaging.php" role="php">
+    <tasks:replace from="@DATA-DIR@" to="data_dir" type="pear-config" />
+    <tasks:replace from="@package_version@" to="version" type="package-info" />
+   </file>
+   <file name="template.spec" role="data" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>4.2</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.3</min>
+   </pearinstaller>
+   <package>
+    <name>PEAR</name>
+    <channel>pear.php.net</channel>
+    <min>1.4.3</min>
+   </package>
+  </required>
+ </dependencies>
+ <phprelease/>
+ <changelog>
+  <release>
+   <version>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2006-01-06</date>
+   <license uri="http://www.php.net/license/3_0.txt">PHP License</license>
+   <notes>
+    Initial release
+   </notes>
+  </release>
+ </changelog>
+</package>
