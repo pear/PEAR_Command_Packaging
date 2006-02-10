@@ -9,12 +9,29 @@
     <arg>FILE</arg>
     <doc>Use FILE as RPM spec file template</doc>
    </spec-template>
+   <rpm-release>
+    <shortopt>r</shortopt>
+    <arg>RELEASE</arg>
+    <doc>RPM release version. Defaults to "1".</doc>
+   </rpm-release>
    <rpm-pkgname>
     <shortopt>p</shortopt>
     <arg>FORMAT</arg>
-    <doc>Use FORMAT as format string for RPM package name, %s is replaced
-by the PEAR package name, defaults to &quot;PEAR::%s&quot;.</doc>
+    <doc>Use FORMAT as format string for RPM package name. Substitutions
+are as follows:
+%s = PEAR package name
+%S = PEAR package name (with underscores replaced with hyphens)
+%C = Channel alias
+%c = Channel alias, lowercased
+Defaults to "%C::%s".</doc>
    </rpm-pkgname>
+   <rpm-depname>
+    <shortopt>d</shortopt>
+    <arg>FORMAT</arg>
+    <doc>Use FORMAT as format string for RPM package name. Substitutions
+are as for the --rpm-pkgname option. Defaults to be the same as
+the format defined by the --rpm-pkgname option.</doc>
+   </rpm-depname>
   </options>
   <doc>&lt;package-file&gt;
 
@@ -22,11 +39,12 @@ Creates an RPM .spec file for wrapping a PEAR package inside an RPM
 package.  Intended to be used from the SPECS directory, with the PEAR
 package tarball in the SOURCES directory:
 
-$ pear makerpm ../SOURCES/Net_Socket-1.0.tgz
-Wrote RPM spec file PEAR::Net_Geo-1.0.spec
+$ cd /path/to/rpm-build-tree/SPECS
+$ pear make-rpm-spec ../SOURCES/Net_Socket-1.0.tgz
+Wrote RPM spec file PEAR::Net_Socket-1.0.spec
 $ rpm -bb PEAR::Net_Socket-1.0.spec
 ...
-Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
+Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
 </doc>
  </make-rpm-spec>
 </commands>
