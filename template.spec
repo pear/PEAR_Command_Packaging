@@ -6,10 +6,9 @@ Version: @version@
 Release: @release@
 License: @release_license@
 Group: Development/Libraries
-Source: http://@master_server@/get/@package@-%{version}.tgz
+Source0: http://@master_server@/get/@package@-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://@master_server@/package/@package@
-Prefix: %{_prefix}
 BuildArchitectures: @arch@
 @extra_headers@
 
@@ -17,10 +16,9 @@ BuildArchitectures: @arch@
 @description@
 
 %prep
-rm -rf %{buildroot}/*
 %setup -c -T
 # XXX Source files location is missing here in pear cmd
-pear -v -c %{buildroot}/pearrc \
+pear -v -c pearrc \
         -d php_dir=%{peardir} \
         -d doc_dir=/docs \
         -d bin_dir=%{_bindir} \
@@ -31,40 +29,41 @@ pear -v -c %{buildroot}/pearrc \
 
 %build
 
-%postun
-# if refcount = 0 then package has been removed (not upgraded)
-if [ "$1" -eq "0" ]; then
-    pear uninstall --nodeps --ignore-errors --register-only @possible_channel@@package@
-fi
-
-
-%post
-pear install --nodeps --soft --force --register-only @rpm_xml_dir@/@package@.xml
-
-
 %install
-pear -c %{buildroot}/pearrc install --nodeps -R %{buildroot} \
-        $RPM_SOURCE_DIR/@package@-%{version}.tgz
-rm %{buildroot}/pearrc
-rm %{buildroot}/%{peardir}/.filemap
-rm %{buildroot}/%{peardir}/.lock
+rm -rf %{buildroot}
+pear -c pearrc install --nodeps -R %{buildroot} %{SOURCE0}
+        
+# Clean up unnecessary files
+rm -f pearrc
+rm -f %{buildroot}/%{peardir}/.filemap
+rm -f %{buildroot}/%{peardir}/.lock
 rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
 rm -rf %{buildroot}%{peardir}/.depdb*
+
+# Sort out documentation
 if [ "@doc_files@" != "" ]; then
      mv %{buildroot}/docs/@package@/* .
      rm -rf %{buildroot}/docs
 fi
+
+# Install XML package description
 mkdir -p %{buildroot}@rpm_xml_dir@
-tar -xzf $RPM_SOURCE_DIR/@package@-%{version}.tgz package@package2xml@.xml
+tar -xzf %{SOURCE0} package@package2xml@.xml
 cp -p package@package2xml@.xml %{buildroot}@rpm_xml_dir@/@package@.xml
 
-#rm -rf %{buildroot}/*
-#pear -q install -R %{buildroot} -n package@package2xml@.xml
-#mkdir -p %{buildroot}@rpm_xml_dir@
-#cp -p package@package2xml@.xml %{buildroot}@rpm_xml_dir@/@package@.xml
+%clean
+rm -rf %{buildroot}
+
+%post
+pear install --nodeps --soft --force --register-only @rpm_xml_dir@/@package@.xml
+
+%postun
+if [ "$1" -eq "0" ]; then
+    pear uninstall --nodeps --ignore-errors --register-only @possible_channel@@package@
+fi
 
 %files
-    %defattr(-,root,root)
-    %doc @doc_files@
-    /
+%defattr(-,root,root)
+%doc @doc_files@
+/
