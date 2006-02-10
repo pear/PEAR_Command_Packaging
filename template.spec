@@ -10,6 +10,7 @@ Source0: http://@master_server@/get/@package@-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://@master_server@/package/@package@
 BuildArchitectures: @arch@
+BuildRequires: @pear_rpm_name@
 @extra_headers@
 
 %description
