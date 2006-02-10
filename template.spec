@@ -1,3 +1,5 @@
+%define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
+
 Summary: PEAR: @summary@
 Name: @rpm_package@
 Version: @version@
@@ -5,7 +7,7 @@ Release: @release@
 License: @release_license@
 Group: Development/Libraries
 Source: http://@master_server@/get/@package@-%{version}.tgz
-BuildRoot: %{_tmppath}/%{name}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://@master_server@/package/@package@
 Prefix: %{_prefix}
 BuildArchitectures: @arch@
@@ -19,17 +21,15 @@ rm -rf %{buildroot}/*
 %setup -c -T
 # XXX Source files location is missing here in pear cmd
 pear -v -c %{buildroot}/pearrc \
-        -d php_dir=%{_libdir}/php/pear \
+        -d php_dir=%{peardir} \
         -d doc_dir=/docs \
         -d bin_dir=%{_bindir} \
-        -d data_dir=%{_libdir}/php/pear/data \
-        -d test_dir=%{_libdir}/php/pear/tests \
+        -d data_dir=%{peardir}/data \
+        -d test_dir=%{peardir}/tests \
         -d ext_dir=%{_libdir} \@extra_config@
         -s
 
 %build
-echo BuildRoot=%{buildroot}
-
 
 %postun
 # if refcount = 0 then package has been removed (not upgraded)
@@ -46,9 +46,9 @@ pear install --nodeps --soft --force --register-only @rpm_xml_dir@/@package@.xml
 pear -c %{buildroot}/pearrc install --nodeps -R %{buildroot} \
         $RPM_SOURCE_DIR/@package@-%{version}.tgz
 rm %{buildroot}/pearrc
-rm %{buildroot}/%{_libdir}/php/pear/.filemap
-rm %{buildroot}/%{_libdir}/php/pear/.lock
-rm -rf %{buildroot}/%{_libdir}/php/pear/.registry
+rm %{buildroot}/%{peardir}/.filemap
+rm %{buildroot}/%{peardir}/.lock
+rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
 rm -rf %{buildroot}%{peardir}/.depdb*
 if [ "@doc_files@" != "" ]; then
