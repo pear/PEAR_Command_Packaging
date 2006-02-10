@@ -34,7 +34,6 @@ echo BuildRoot=%{buildroot}
 # if refcount = 0 then package has been removed (not upgraded)
 if [ "$1" -eq "0" ]; then
     pear uninstall --nodeps -r @possible_channel@@package@
-    rm @rpm_xml_dir@/@package@.xml
 fi
 
 
