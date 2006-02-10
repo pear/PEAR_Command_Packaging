@@ -1,7 +1,7 @@
 Summary: PEAR: @summary@
 Name: @rpm_package@
 Version: @version@
-Release: 1
+Release: @release@
 License: @release_license@
 Group: Development/Libraries
 Source: http://@master_server@/get/@package@-%{version}.tgz

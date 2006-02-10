@@ -54,12 +54,29 @@ class PEAR_Command_Packaging extends PEAR_Command_Common
                     'arg' => 'FILE',
                     'doc' => 'Use FILE as RPM spec file template'
                     ),
+                'rpm-release' => array(
+                    'shortopt' => 'r',
+                    'arg' => 'RELEASE',
+                    'doc' => 'RPM release version. Defaults to "1".'
+                    ),
                 'rpm-pkgname' => array(
                     'shortopt' => 'p',
                     'arg' => 'FORMAT',
-                    'doc' => 'Use FORMAT as format string for RPM package name, %s is replaced
-by the PEAR package name, defaults to "PEAR::%s".',
+                    'doc' => 'Use FORMAT as format string for RPM package name. Substitutions
+are as follows:
+%s = PEAR package name
+%S = PEAR package name (with underscores replaced with hyphens)
+%C = Channel alias
+%c = Channel alias, lowercased
+Defaults to "%C::%s".',
                     ),
+                'rpm-depname' => array(
+                    'shortopt' => 'd',
+                    'arg' => 'FORMAT',
+                    'doc' => 'Use FORMAT as format string for RPM package name. Substitutions
+are as for the --rpm-pkgname option. Defaults to be the same as
+the format defined by the --rpm-pkgname option.',
+                   ),
                 ),
             'doc' => '<package-file>
 
@@ -68,7 +85,7 @@ package.  Intended to be used from the SPECS directory, with the PEAR
 package tarball in the SOURCES directory:
 
 $ pear makerpm ../SOURCES/Net_Socket-1.0.tgz
-Wrote RPM spec file PEAR::Net_Geo-1.0.spec
+Wrote RPM spec file PEAR::Net_Socket-1.0.spec
 $ rpm -bb PEAR::Net_Socket-1.0.spec
 ...
 Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
@@ -165,25 +182,42 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         }
         $info['possible_channel'] = '';
         $info['extra_config'] = '';
+        
         if (isset($options['rpm-pkgname'])) {
             $rpm_pkgname_format = $options['rpm-pkgname'];
         } else {
-            if ($pf->getChannel() == 'pear.php.net' || $pf->getChannel() == 'pecl.php.net') {
-                $alias = 'PEAR';
-            } else {
-                $chan = &$reg->getChannel($pf->getChannel());
-                $alias = $chan->getAlias();
-                $alias = strtoupper($alias);
-                $info['possible_channel'] = $pf->getChannel() . '/';
-            }
-            $rpm_pkgname_format = $alias . '::%s';
+            $rpm_pkgname_format = '%C::%s';
+        }
+        
+        if (isset($options['rpm-depname'])) {
+            $rpm_depname_format = $options['rpm-depname'];
+        } else {
+            $rpm_depname_format = $rpm_pkgname_format;
+        }
+        
+        if (isset($options['rpm-release'])) {
+            $info['release'] = $options['rpm-release'];
+        } else {
+            $info['release'] = '1';
+        }
+        
+        $alias = $this->_getChannelAlias($pf->getChannel(), $pf->getPackage());
+        if ($alias != 'PEAR' && $alias != 'PECL') {
+            $info['possible_channel'] = $pf->getChannel() . '/';
         }
 
         $info['extra_headers'] = '';
         $info['doc_files'] = '';
         $info['files'] = '';
         $info['package2xml'] = '';
-        $info['rpm_package'] = sprintf($rpm_pkgname_format, $pf->getPackage());
+        $info['rpm_package'] = $this->_getRPMNameFromFormat($rpm_pkgname_format, $pf->getPackage(), $alias);
+        
+        // Hook to support virtual provides, where the dependency name differs
+        // from the package name
+        if ($rpm_pkgname_format != $rpm_depname_format) {
+            $info['extra_headers'] .= 'Provides: ' . $this->_getRPMNameFromFormat($rpm_depname_format, $pf->getPackage(), $alias) . ' = ' . $pf->getVersion(). "\n";
+        }
+        
         $srcfiles = 0;
         foreach ($info['filelist'] as $name => $attr) {
             if (!isset($attr['role'])) {
@@ -264,13 +298,11 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
                     if ($dep['type'] != 'pkg') {
                         continue;
                     }
-                    if (isset($dep['channel']) && $dep['channel'] != 'pear.php.net' &&
-                          $dep['channel'] != 'pecl.php.net') {
-                        $chan = &$reg->getChannel($dep['channel']);
-                        $package = strtoupper($chan->getAlias()) . '::' . $dep['name'];
-                    } else {
-                        $package = 'PEAR::' . $dep['name'];
-                    }
+                    
+                    if (!isset($dep['channel'])) $dep['channel'] = null;
+                    // $package contains the *dependency name* here, which may or may
+                    // not be the same as the package name
+                    $package = $this->_getRPMNameFromFormat($rpm_depname_format, $dep['name'], $this->_getChannelAlias($dep['channel'], $dep['name']));
                     $trans = array(
                         '>' => '>',
                         '<' => '<',
@@ -308,12 +340,10 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
                         $deps['required']['package'] = array($deps['required']['package']);
                     }
                     foreach ($deps['required']['package'] as $dep) {
-                        if ($dep['channel'] != 'pear.php.net' &&  $dep['channel'] != 'pecl.php.net') {
-                            $chan = &$reg->getChannel($dep['channel']);
-                            $package = strtoupper($chan->getAlias()) . '::' . $dep['name'];
-                        } else {
-                            $package = 'PEAR::' . $dep['name'];
-                        }
+                        if (!isset($dep['channel'])) $dep['channel'] = null;
+                        // $package contains the *dependency name* here, which may or may
+                        // not be the same as the package name
+                        $package = $this->_getRPMNameFromFormat($rpm_depname_format, $dep['name'], $this->_getChannelAlias($dep['channel'], $dep['name']));
                         if (isset($dep['conflicts']) && (isset($dep['min']) ||
                               isset($dep['max']))) {
                             $deprange = array();
@@ -450,6 +480,87 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
 
         return true;
     }
+	
+    // }}}
+    // {{{ _getChannelAlias()
+    /*
+     * Return a channel alias from a channel name
+     *
+     * @param  string $chan_name    Channel name (e.g. 'pecl.php.net')
+     * @param  string $package_name Optional name of the PEAR package to which $chan_name relates.
+     *                              Assists when "guessing" channel aliases for PEAR/PECL
+     * @return string Channel alias (e.g. 'PECL')
+     */
+
+    function _getChannelAlias($chan_name, $package_name = null)
+    {
+        switch($chan_name) {
+            case null:
+            case '':
+                // If channel name not supplied, it is presumably
+                // either PEAR or PECL. There's no sure-fire way of
+                // telling between the two, but we try to make an
+                // intelligent guess: if the package name is supplied
+                // and starts with a lowercase letter, it's PECL.
+                if (ereg('^[a-z]', $package_name)) {
+                    $alias = 'PECL';
+                } else {
+                    $alias = 'PEAR';
+                }
+                break;
+            case 'pear.php.net':
+                $alias = 'PEAR';
+                break;
+            case 'pecl.php.net':
+                $alias = 'PECL';
+                break;
+            default:
+                $reg = &$this->config->getRegistry();
+                $chan = &$reg->getChannel($pf->getChannel());
+                $alias = $chan->getAlias();
+                $alias = strtoupper($alias);
+                break;
+         }
+         return $alias;
+    }
+
+	
+    // }}}
+    // {{{ _getRPMNameFromFormat()
+    /*
+     * Get an RPM package or dependency name from a format string
+     *
+     * This method generates an RPM package or dependency name based on
+     * a format string containing substitution variables, rather like
+     * sprintf(). It supports the following substitution variables:
+     * %s = package name
+     * %S = package name, with underscores replaced with hyphens
+     * %C = channel alias
+     * %c = channel alias, lowercased
+     *
+     * @param  string $format            Format string
+     * @param  string $pear_package_name PEAR package name (e.g. Example_Package)
+     * @param  string $channel_alias     Channel alias (e.g. 'PEAR', 'PECL')
+     * @return string RPM package/dependency name
+     */
+
+    function _getRPMNameFromFormat($format, $pear_package_name, $channel_alias)
+    {
+        // The package name
+        $name = str_replace('%s', $pear_package_name, $format);
+        
+        // The package name, with underscores replaced with hyphens
+        $name = str_replace('%S', str_replace('_', '-', $pear_package_name), $name);
+        
+        // The channel alias
+        $name = str_replace('%C', $channel_alias, $name);
+        
+        // The channel alias, lowercased
+        $name = str_replace('%c', strtolower($channel_alias), $name);
+        
+        return $name;
+    }
+
 }
 
 ?>
