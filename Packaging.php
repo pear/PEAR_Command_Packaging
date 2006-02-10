@@ -84,11 +84,12 @@ Creates an RPM .spec file for wrapping a PEAR package inside an RPM
 package.  Intended to be used from the SPECS directory, with the PEAR
 package tarball in the SOURCES directory:
 
-$ pear makerpm ../SOURCES/Net_Socket-1.0.tgz
+$ cd /path/to/rpm-build-tree/SPECS
+$ pear make-rpm-spec ../SOURCES/Net_Socket-1.0.tgz
 Wrote RPM spec file PEAR::Net_Socket-1.0.spec
 $ rpm -bb PEAR::Net_Socket-1.0.spec
 ...
-Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
+Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
 ',
             ),
         );
