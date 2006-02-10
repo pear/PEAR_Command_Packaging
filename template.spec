@@ -49,6 +49,8 @@ rm %{buildroot}/pearrc
 rm %{buildroot}/%{_libdir}/php/pear/.filemap
 rm %{buildroot}/%{_libdir}/php/pear/.lock
 rm -rf %{buildroot}/%{_libdir}/php/pear/.registry
+rm -rf %{buildroot}%{peardir}/.channels
+rm -rf %{buildroot}%{peardir}/.depdb*
 if [ "@doc_files@" != "" ]; then
      mv %{buildroot}/docs/@package@/* .
      rm -rf %{buildroot}/docs
