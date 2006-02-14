@@ -32,7 +32,7 @@ pear -v -c pearrc \
 
 %install
 rm -rf %{buildroot}
-pear -c pearrc install --nodeps -R %{buildroot} %{SOURCE0}
+pear -c pearrc install --nodeps --packagingroot %{buildroot} %{SOURCE0}
         
 # Clean up unnecessary files
 rm -f pearrc
