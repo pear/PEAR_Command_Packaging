@@ -132,6 +132,14 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $a = &new PEAR_Installer($ui);
         return $a;
     }
+	
+	/**
+     * For unit testing purposes
+     */
+	function makeTempDir()
+	{
+		return System::mktemp(array('-d', 'pear2rpm'));
+	}
 
     function doMakeRPM($command, $options, $params)
     {
@@ -158,8 +166,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             }
             return $this->raiseError("$params[0] is not a valid package");
         }
-        $tmpdir = System::mktemp(array('-d', 'pear2rpm'));
-        $instroot = System::mktemp(array('-d', 'pear2rpm'));
+		$tmpdir = $this->makeTempDir();
+		$instroot = $this->makeTempDir();
         $tmp = $this->config->get('verbose');
         $this->config->set('verbose', 0);
         $installer = $this->getInstaller($this->ui);
