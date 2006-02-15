@@ -133,13 +133,13 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         return $a;
     }
 	
-	/**
+    /**
      * For unit testing purposes
      */
-	function makeTempDir()
-	{
-		return System::mktemp(array('-d', 'pear2rpm'));
-	}
+    function makeTempDir()
+    {
+        return System::mktemp(array('-d', 'pear2rpm'));
+    }
 
     function doMakeRPM($command, $options, $params)
     {
