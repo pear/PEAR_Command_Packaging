@@ -1,10 +1,11 @@
 <?php
 
-// general test setup
+$server = 'pear.Chiara';
+//$server = 'test.pear.php.net';
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mock_classes.php.inc';
 
-register_shutdown_function('cleanall');
+require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
+
 cleanall($temp_path);
 $statedir = $temp_path;
 if (!is_dir($temp_path)) {
@@ -55,6 +56,10 @@ touch($temp_path . DIRECTORY_SEPARATOR . 'pear.ini');
 $fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.ini', 'w');
 fwrite($fp, $config);
 fclose($fp);
+touch($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
+$fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.conf', 'w');
+fwrite($fp, $config);
+fclose($fp);
 
 putenv('PHP_PEAR_SYSCONF_DIR='.$temp_path);
 $home = getenv('HOME');
@@ -62,24 +67,13 @@ if (!empty($home)) {
     // for PEAR_Config initialization
     putenv('HOME="'.$temp_path);
 }
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
+require_once "PEAR/ChannelFile.php";
+require_once dirname(dirname(__FILE__)) . '/download_test_classes.php.inc';
+require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
 $phpunit = &new PEAR_PHPTest(true);
 $fakelog = new fake_log;
-$config = &test_PEAR_Config::singleton($temp_path . '/pear.ini');
-test_PEAR_Dependency2::singleton($config);
-/**
- * @param array
- * @return test_PEAR_Downloader_Package
- */
-function &newFakeDownloaderPackage($options)
-{
-    global $config, $fakelog;
-    $downloader = &new test_PEAR_Downloader($fakelog, $options, $config);
-    $p = &new test_PEAR_Downloader_Package($downloader);
-    return $p;
-}
+$config = &new test_PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');
 
-// test setup specific to PEAR_Command_Packaging
 require_once 'PEAR/Command/Packaging.php';
 class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 {
@@ -95,7 +89,18 @@ class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
         $a = &new test_PEAR_Installer($this->ui, array(), $this->config);
         return $a;
     }
-
+	
+	// this is not used at the moment as the output from the installer (featuring paths)
+	// is not examined, but may be useful in future as it provides a "known" temp
+	// directory name rather than the random one from System::mktemp
+	function makeTempDir() 
+	{
+		static $a = 0;
+		$dir = $GLOBALS['temp_path'] . DIRECTORY_SEPARATOR . 'pear2rpm-temp' . $a++;
+		mkdir($dir);
+		return $dir;
+	}
 }
+
 $command = &new test_PEAR_Command_Packaging($fakelog, $config);
 ?>
