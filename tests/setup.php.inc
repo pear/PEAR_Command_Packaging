@@ -4,7 +4,7 @@ $server = 'pear.Chiara';
 //$server = 'test.pear.php.net';
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
 
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
 
 cleanall($temp_path);
 $statedir = $temp_path;
@@ -67,9 +67,9 @@ if (!empty($home)) {
     // for PEAR_Config initialization
     putenv('HOME="'.$temp_path);
 }
-require_once "PEAR/ChannelFile.php";
-require_once dirname(dirname(__FILE__)) . '/download_test_classes.php.inc';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
+//require_once "PEAR/ChannelFile.php";
+//require_once dirname(dirname(__FILE__)) . '/download_test_classes.php.inc';
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
 $phpunit = &new PEAR_PHPTest(true);
 $fakelog = new fake_log;
 $config = &new test_PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');

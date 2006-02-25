@@ -26,7 +26,7 @@ $phpunit->showall();
 chdir($savedir);
 $phpunit->assertFileExists($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . 
     DIRECTORY_SEPARATOR . 'php-pear-Net-SMTP-1.2.8.spec', 'spec file');
-$phpunit->assertEquals(file_get_contents('test_option_rpm-pkgname.out'), file_get_contents($temp_path .
+$phpunit->assertEquals(file_get_contents('packagefiles/test_option_rpm-pkgname.spec'), file_get_contents($temp_path .
     DIRECTORY_SEPARATOR . 'SPECS' .
     DIRECTORY_SEPARATOR . 'php-pear-Net-SMTP-1.2.8.spec'), 'spec file contents');
 
