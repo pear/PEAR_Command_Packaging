@@ -67,4 +67,5 @@ fi
 %files
 %defattr(-,root,root)
 %doc @doc_files@
-/
+%{peardir}/*
+@rpm_xml_dir@/@package@.xml
