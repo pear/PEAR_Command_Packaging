@@ -10,7 +10,7 @@ Source0: http://pear.php.net/get/Net_SMTP-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.php.net/package/Net_SMTP
 BuildArchitectures: noarch
-BuildRequires: PEAR::PEAR
+BuildRequires: PEAR::PEAR >= 1.4.7
 Requires: PEAR::Net_Socket
 
 %description
@@ -67,4 +67,5 @@ fi
 %files
 %defattr(-,root,root)
 %doc  docs/examples/basic.php docs/guide.txt
-/
+%{peardir}/*
+/var/lib/pear/Net_SMTP.xml
