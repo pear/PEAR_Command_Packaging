@@ -42,11 +42,7 @@ rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
 rm -rf %{buildroot}%{peardir}/.depdb*
 
-# Sort out documentation
-if [ "@doc_files@" != "" ]; then
-     mv %{buildroot}/docs/@package@/* .
-     rm -rf %{buildroot}/docs
-fi
+@doc_files_relocation_script@
 
 # Install XML package description
 mkdir -p %{buildroot}@rpm_xml_dir@
@@ -66,6 +62,6 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc @doc_files@
+@doc_files_statement@
 %{peardir}/*
 @rpm_xml_dir@/@package@.xml

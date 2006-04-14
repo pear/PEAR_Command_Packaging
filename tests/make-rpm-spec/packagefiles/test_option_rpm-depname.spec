@@ -43,11 +43,7 @@ rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
 rm -rf %{buildroot}%{peardir}/.depdb*
 
-# Sort out documentation
-if [ " docs/examples/basic.php docs/guide.txt" != "" ]; then
-     mv %{buildroot}/docs/Net_SMTP/* .
-     rm -rf %{buildroot}/docs
-fi
+mv %{buildroot}/docs .
 
 # Install XML package description
 mkdir -p %{buildroot}/var/lib/pear
@@ -67,6 +63,6 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc  docs/examples/basic.php docs/guide.txt
+%doc docs/Net_SMTP/{docs/examples/basic.php,docs/guide.txt}
 %{peardir}/*
 /var/lib/pear/Net_SMTP.xml

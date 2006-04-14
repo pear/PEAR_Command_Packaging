@@ -216,7 +216,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         }
 
         $info['extra_headers'] = '';
-        $info['doc_files'] = '';
+        $info['doc_files'] = array();
+        $info['doc_files_relocation_script'] = '';
+        $info['doc_files_statement'] = '';
         $info['files'] = '';
         $info['package2xml'] = '';
         $info['rpm_package'] = $this->_getRPMNameFromFormat($rpm_pkgname_format, $pf->getPackage(), $alias);
@@ -235,7 +237,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             }
             $name = preg_replace('![/:\\\\]!', '/', $name);
             if ($attr['role'] == 'doc') {
-                $info['doc_files'] .= " $name";
+                $info['doc_files'][] .= $name;
             // Map role to the rpm vars
             } else {
                 $c_prefix = '%{_libdir}/php/pear';
@@ -273,6 +275,20 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 $info['files'] .= "$prefix/$name\n";
             }
         }
+        
+        $ndocs = count($info['doc_files']);
+        if ($ndocs > 1) {
+            $info['doc_files'] = 'docs/' . $pf->getPackage() . '/{' . implode(',', $info['doc_files']) . '}';
+        } elseif ($ndocs > 0) {
+            $info['doc_files'] = 'docs/' . $pf->getPackage() . '/' . $info['doc_files'][0];
+        } else {
+            $info['doc_files'] = '';
+        }
+        if (!empty($info['doc_files'])) {
+            $info['doc_files_statement'] = '%doc ' . $info['doc_files'];
+            $info['doc_files_relocation_script'] = "mv %{buildroot}/docs .\n";
+        }
+        
         if ($srcfiles > 0) {
             require_once 'OS/Guess.php';
             $os = new OS_Guess;
