@@ -342,13 +342,15 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         'eq' => '=',
                     );
                     if ($dep['rel'] == 'has') {
-                        $requires[] = $package;
+                        // We use $package as the index to the $requires array to de-duplicate deps.
+                        // Note that in the case of duplicate deps, versioned deps will "win" - see several lines down.
+                        $requires[$package] = $package;
                     } elseif ($dep['rel'] == 'not') {
                         $conflicts[] = $package;
                     } elseif ($dep['rel'] == 'ne') {
                         $conflicts[] = $package . ' = ' . $dep['version'];
                     } elseif (isset($trans[$dep['rel']])) {
-                        $requires[] = $package . ' ' . $trans[$dep['rel']] . ' ' . $dep['version'];
+                        $requires[$package] = $package . ' ' . $trans[$dep['rel']] . ' ' . $dep['version'];
                     }
                 }
                 if (count($requires)) {
@@ -443,14 +445,14 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                             if (isset($dep['conflicts'])) {
                                 $conflicts[] = $package;
                             } else {
-                                $requires[] = $package;
+                                $requires[$package] = $package;
                             }
                         } else {
                             if (isset($dep['min'])) {
-                                $requires[] = $package . ' >= ' . $dep['min'];
+                                $requires[$package] = $package . ' >= ' . $dep['min'];
                             }
                             if (isset($dep['max'])) {
-                                $requires[] = $package . ' <= ' . $dep['max'];
+                                $requires[$package] = $package . ' <= ' . $dep['max'];
                             }
                             if (isset($dep['exclude'])) {
                                 $ex = $dep['exclude'];
@@ -471,7 +473,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                     if ($a === null || PEAR::isError($a)) {
                         $info['package2xml'] = '';
                         // this doesn't have a package.xml version 1.0
-                        $requires[] = 'PEAR::PEAR >= ' .
+                        $requires[$info['pear_rpm_name']] = $info['pear_rpm_name'] . ' >= ' .
                             $deps['required']['pearinstaller']['min'];
                     }
                     if (count($requires)) {
