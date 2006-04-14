@@ -166,8 +166,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             }
             return $this->raiseError("$params[0] is not a valid package");
         }
-		$tmpdir = $this->makeTempDir();
-		$instroot = $this->makeTempDir();
+        $tmpdir = $this->makeTempDir();
+        $instroot = $this->makeTempDir();
         $tmp = $this->config->get('verbose');
         $this->config->set('verbose', 0);
         $installer = $this->getInstaller($this->ui);
