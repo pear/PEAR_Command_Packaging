@@ -314,6 +314,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $info['package'] = $pf->getPackage();
         $info['version'] = $pf->getVersion();
         $info['release_license'] = $pf->getLicense();
+        $info['release_state'] = $pf->getState();
         if ($pf->getDeps()) {
             if ($pf->getPackagexmlVersion() == '1.0') {
                 $requires = $conflicts = array();
