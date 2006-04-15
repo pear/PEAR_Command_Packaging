@@ -65,6 +65,7 @@ class PEAR_Command_Packaging extends PEAR_Command_Common
                     'doc' => 'Use FORMAT as format string for RPM package name. Substitutions
 are as follows:
 %s = PEAR package name
+%l = PEAR package name (lowercased)
 %S = PEAR package name (with underscores replaced with hyphens)
 %C = Channel alias
 %c = Channel alias, lowercased
@@ -95,6 +96,24 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         );
 
     var $output;
+    
+    // The default format of the RPM package name
+    var $_rpm_pkgname_format = '%C::%s';
+    
+    // The default format of various dependencies that might be generated in the
+    // spec file.
+    // NULL = "don't generate a dep".
+    // %P   = use the same as whatever rpm_pkgname_format is set to be
+    var $_rpm_depname_format = array(
+        'pkg' => '%P',
+        'ext' => 'php-%l',
+        'php' => 'php');
+    
+    // Format of the filename for the output spec file. Substitutions are as per 
+    // the rpm-pkgname format string, with the addition of:
+    // %v = package version
+    // %P = use the same as whatever rpm_pkgname_format is set to be
+    var $_rpm_specname_format = '%P-%v.spec';
 
     /**
      * PEAR_Command_Packaging constructor.
@@ -182,52 +201,49 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                                     array('installroot' => $instroot,
                                           'nodeps' => true, 'soft' => true));
         $pkgdir = $pf->getPackage() . '-' . $pf->getVersion();
-        $info['rpm_xml_dir'] = '/var/lib/pear';
         $this->config->set('verbose', $tmp);
+        
+        // Work out where we are loading the specfile template from
         if (isset($options['spec-template'])) {
             $spec_template = $options['spec-template'];
         } else {
             $spec_template = '@DATA-DIR@/PEAR_Command_Packaging/template.spec';
         }
-        $info['possible_channel'] = '';
-        $info['extra_config'] = '';
+
+        // Initialise the RPM package/dep naming format options
+        $this->_initialiseNamingOptions($options);        
         
-        if (isset($options['rpm-pkgname'])) {
-            $rpm_pkgname_format = $options['rpm-pkgname'];
-        } else {
-            $rpm_pkgname_format = '%C::%s';
-        }
-        
-        if (isset($options['rpm-depname'])) {
-            $rpm_depname_format = $options['rpm-depname'];
-        } else {
-            $rpm_depname_format = $rpm_pkgname_format;
-        }
-        
+        // Set the RPM release version
         if (isset($options['rpm-release'])) {
             $info['release'] = $options['rpm-release'];
         } else {
             $info['release'] = '1';
         }
         
+        // Work out the alias for the channel that this package is in
+        $info['possible_channel'] = '';
         $alias = $this->_getChannelAlias($pf->getChannel(), $pf->getPackage());
         if ($alias != 'PEAR' && $alias != 'PECL') {
             $info['possible_channel'] = $pf->getChannel() . '/';
         }
 
+        // Set up some of the basic macros
+        $info['rpm_xml_dir'] = '/var/lib/pear';
+        $info['extra_config'] = '';
         $info['extra_headers'] = '';
         $info['doc_files'] = array();
         $info['doc_files_relocation_script'] = '';
         $info['doc_files_statement'] = '';
         $info['files'] = '';
         $info['package2xml'] = '';
-        $info['rpm_package'] = $this->_getRPMNameFromFormat($rpm_pkgname_format, $pf->getPackage(), $alias);
-        $info['pear_rpm_name'] = $this->_getRPMNameFromFormat($rpm_depname_format, 'PEAR', 'PEAR');
+        $info['rpm_package'] = $this->_getRPMName($pf->getPackage(), $pf->getChannel());
+        $info['pear_rpm_name'] = $this->_getRPMName('PEAR', 'pear.php.net', 'pkgdep');
         
         // Hook to support virtual provides, where the dependency name differs
         // from the package name
-        if ($rpm_pkgname_format != $rpm_depname_format) {
-            $info['extra_headers'] .= 'Provides: ' . $this->_getRPMNameFromFormat($rpm_depname_format, $pf->getPackage(), $alias) . ' = ' . $pf->getVersion(). "\n";
+        $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), 'pkgdep');
+        if (!empty($rpmdep) && $rpmdep != $info['rpm_package']) {
+            $info['extra_headers'] .= "Provides: $rpmdep = " . $pf->getVersion(). "\n";
         }
         
         $srcfiles = 0;
@@ -322,14 +338,23 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                     if (isset($dep['optional']) && $dep['optional'] == 'yes') {
                         continue;
                     }
-                    if ($dep['type'] != 'pkg') {
-                        continue;
+                    
+                    if (!isset($dep['type']) || $dep['type'] == 'pkg') {
+                        $type = 'pkgdep';
+                    } else {
+                        $type = $dep['type'];
                     }
                     
                     if (!isset($dep['channel'])) $dep['channel'] = null;
                     // $package contains the *dependency name* here, which may or may
                     // not be the same as the package name
-                    $package = $this->_getRPMNameFromFormat($rpm_depname_format, $dep['name'], $this->_getChannelAlias($dep['channel'], $dep['name']));
+                    $package = $this->_getRPMName($dep['name'], $dep['channel'], $type);
+
+                    // If we could not find an RPM namespace equivalent, don't add the dependency
+                    if (empty($package)) {
+                        continue;
+                    }
+
                     $trans = array(
                         '>' => '>',
                         '<' => '<',
@@ -369,10 +394,22 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         $deps['required']['package'] = array($deps['required']['package']);
                     }
                     foreach ($deps['required']['package'] as $dep) {
+
+                        if (!isset($dep['type']) || $dep['type'] == 'pkg') {
+                            $type = 'pkgdep';
+                        } else {
+                            $type = $dep['type'];
+                        }
+
                         if (!isset($dep['channel'])) $dep['channel'] = null;
                         // $package contains the *dependency name* here, which may or may
                         // not be the same as the package name
-                        $package = $this->_getRPMNameFromFormat($rpm_depname_format, $dep['name'], $this->_getChannelAlias($dep['channel'], $dep['name']));
+                        $package = $this->_getRPMName($dep['name'], $dep['channel'], $type);
+                        
+                        if (empty($package)) {
+                            continue;
+                        }
+                        
                         if (isset($dep['conflicts']) && (isset($dep['min']) ||
                               isset($dep['max']))) {
                             $deprange = array();
@@ -498,7 +535,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 fread($fp, filesize($spec_template)));
             fclose($fp);
         }
-        $spec_file = "$info[rpm_package]-$info[version].spec";
+        $spec_file = $this->_getRPMNameFromFormat($this->_rpm_specname_format, $pf->getPackage(), $alias, $info['version']);
         $wp = fopen($spec_file, "wb");
         if (!$wp) {
             return $this->raiseError("could not write RPM spec file $spec_file: $php_errormsg");
@@ -508,6 +545,59 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->ui->outputData("Wrote RPM spec file $spec_file", $command);
 
         return true;
+    }
+    
+
+    // }}}
+    // {{{ _initialiseNamingOptions()
+    /*
+     * Initialise the RPM naming options
+     *
+     * @param  array &$options    Standard options array
+     * @return void
+     */    
+    function _initialiseNamingOptions(&$options)
+    {
+        if (isset($options['rpm-pkgname'])) {
+            $this->_rpm_pkgname_format = $options['rpm-pkgname'];
+        }
+        
+        if (isset($options['rpm-depname'])) {
+            $this->_rpm_depname_format['pkg'] = $options['rpm-depname'];
+        } else {
+            $this->_rpm_depname_format['pkg'] = $this->_rpm_pkgname_format;
+        }
+    }
+    
+    
+    // }}}
+    // {{{ _getRPMName()
+    /*
+     * Return an RPM name
+     *
+     * @param  string $package_name Package name
+     * @param  string $chan_name    Optional channel name
+     * @param  string $type         Optional type (e.g. 'pkg', 'ext'). Defaults to 'pkg'.
+     *                              'pkgdep' is a special case that means 'pkg', but it's a 
+     *                              dependency rather than the package itself
+     *
+     * @return string RPM name. If empty, assume there is no equivalent in RPM namespace.
+     */
+    function _getRPMName($package_name, $chan_name=null, $type='pkg')
+    {
+        $chan_alias = $this->_getChannelAlias($chan_name, $package_name);
+        switch ($type) {
+            case 'pkg':
+                return $this->_getRPMNameFromFormat($this->_rpm_pkgname_format, $package_name, $chan_alias);
+            case 'pkgdep':
+                $type = 'pkg';
+                // let it drop through...
+            default:
+                if (isset($this->_rpm_depname_format[$type]) && !empty($this->_rpm_depname_format[$type])) {
+                    return $this->_getRPMNameFromFormat($this->_rpm_depname_format[$type], $package_name, $chan_alias);
+                }
+                return '';
+        }
     }
 	
     // }}}
@@ -563,29 +653,43 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      * a format string containing substitution variables, rather like
      * sprintf(). It supports the following substitution variables:
      * %s = package name
+     * %l = package name, lowercased
      * %S = package name, with underscores replaced with hyphens
      * %C = channel alias
      * %c = channel alias, lowercased
+     * %P = whatever the rpm pkgname format is set to be
      *
-     * @param  string $format            Format string
-     * @param  string $pear_package_name PEAR package name (e.g. Example_Package)
-     * @param  string $channel_alias     Channel alias (e.g. 'PEAR', 'PECL')
+     * @param  string $format          Format string
+     * @param  string $package_name    Package name (e.g. 'Example_Package')
+     * @param  string $channel_alias   Channel alias (e.g. 'PEAR', 'PECL')
+     * @param  string $version         Package version (e.g. '1.2.3')
      * @return string RPM package/dependency name
      */
 
-    function _getRPMNameFromFormat($format, $pear_package_name, $channel_alias)
+    function _getRPMNameFromFormat($format, $package_name, $channel_alias, $version=null)
     {
-        // The package name
-        $name = str_replace('%s', $pear_package_name, $format);
+        $name = $format;
+    
+        // pkgname_format
+        $name = str_replace('%P', $this->_rpm_pkgname_format, $name);
+    
+        // Package name
+        $name = str_replace('%s', $package_name, $name);
         
-        // The package name, with underscores replaced with hyphens
-        $name = str_replace('%S', str_replace('_', '-', $pear_package_name), $name);
+        // Package name, lowercased
+        $name = str_replace('%l', strtolower($package_name), $name);
         
-        // The channel alias
+        // Package name, with underscores replaced with hyphens
+        $name = str_replace('%S', str_replace('_', '-', $package_name), $name);
+
+        // Channel alias
         $name = str_replace('%C', $channel_alias, $name);
         
-        // The channel alias, lowercased
+        // Channel alias, lowercased
         $name = str_replace('%c', strtolower($channel_alias), $name);
+
+        // Version
+        $name = str_replace('%v', $version, $name);
         
         return $name;
     }
