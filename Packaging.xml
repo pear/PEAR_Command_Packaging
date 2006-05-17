@@ -20,6 +20,7 @@
     <doc>Use FORMAT as format string for RPM package name. Substitutions
 are as follows:
 %s = PEAR package name
+%l = PEAR package name (lowercased)
 %S = PEAR package name (with underscores replaced with hyphens)
 %C = Channel alias
 %c = Channel alias, lowercased
