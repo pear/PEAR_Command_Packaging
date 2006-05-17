@@ -656,6 +656,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      * %s = package name
      * %l = package name, lowercased
      * %S = package name, with underscores replaced with hyphens
+     * %v = package version
      * %C = channel alias
      * %c = channel alias, lowercased
      * %P = whatever the rpm pkgname format is set to be
