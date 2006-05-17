@@ -1,4 +1,5 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
+%define xmldir  @rpm_xml_dir@
 
 Summary: PEAR: @summary@
 Name: @rpm_package@
@@ -45,15 +46,15 @@ rm -rf %{buildroot}%{peardir}/.depdb*
 @doc_files_relocation_script@
 
 # Install XML package description
-mkdir -p %{buildroot}@rpm_xml_dir@
+mkdir -p %{buildroot}%{xmldir}
 tar -xzf %{SOURCE0} package@package2xml@.xml
-cp -p package@package2xml@.xml %{buildroot}@rpm_xml_dir@/@package@.xml
+cp -p package@package2xml@.xml %{buildroot}%{xmldir}/@package@.xml
 
 %clean
 rm -rf %{buildroot}
 
 %post
-pear install --nodeps --soft --force --register-only @rpm_xml_dir@/@package@.xml
+pear install --nodeps --soft --force --register-only %{xmldir}/@package@.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
@@ -64,4 +65,4 @@ fi
 %defattr(-,root,root)
 @doc_files_statement@
 %{peardir}/*
-@rpm_xml_dir@/@package@.xml
+%{xmldir}/@package@.xml
