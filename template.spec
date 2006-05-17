@@ -36,12 +36,13 @@ rm -rf %{buildroot}
 pear -c pearrc install --nodeps --packagingroot %{buildroot} %{SOURCE0}
         
 # Clean up unnecessary files
-rm -f pearrc
-rm -f %{buildroot}/%{peardir}/.filemap
-rm -f %{buildroot}/%{peardir}/.lock
+rm pearrc
+rm %{buildroot}/%{peardir}/.filemap
+rm %{buildroot}/%{peardir}/.lock
 rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
-rm -rf %{buildroot}%{peardir}/.depdb*
+rm %{buildroot}%{peardir}/.depdb
+rm %{buildroot}%{peardir}/.depdblock
 
 @doc_files_relocation_script@
 
