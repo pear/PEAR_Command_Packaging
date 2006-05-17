@@ -238,6 +238,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $info['package2xml'] = '';
         $info['rpm_package'] = $this->_getRPMName($pf->getPackage(), $pf->getChannel());
         $info['pear_rpm_name'] = $this->_getRPMName('PEAR', 'pear.php.net', 'pkgdep');
+        $info['description'] = wordwrap($info['description']);
         
         // Hook to support virtual provides, where the dependency name differs
         // from the package name
