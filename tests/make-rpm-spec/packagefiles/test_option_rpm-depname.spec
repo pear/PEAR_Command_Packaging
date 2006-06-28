@@ -1,4 +1,5 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
+%define xmldir  /var/lib/pear
 
 Summary: PEAR: An implementation of the SMTP protocol
 Name: PEAR::Net_SMTP
@@ -15,7 +16,8 @@ Provides: php-pear(Net_SMTP) = 1.2.8
 Requires: php-pear(Net_Socket)
 
 %description
-Provides an implementation of the SMTP protocol using PEAR's Net_Socket class.
+Provides an implementation of the SMTP protocol using PEAR's Net_Socket
+class.
 
 %prep
 %setup -c -T
@@ -36,25 +38,27 @@ rm -rf %{buildroot}
 pear -c pearrc install --nodeps --packagingroot %{buildroot} %{SOURCE0}
         
 # Clean up unnecessary files
-rm -f pearrc
-rm -f %{buildroot}/%{peardir}/.filemap
-rm -f %{buildroot}/%{peardir}/.lock
+rm pearrc
+rm %{buildroot}/%{peardir}/.filemap
+rm %{buildroot}/%{peardir}/.lock
 rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
-rm -rf %{buildroot}%{peardir}/.depdb*
+rm %{buildroot}%{peardir}/.depdb
+rm %{buildroot}%{peardir}/.depdblock
 
 mv %{buildroot}/docs .
 
+
 # Install XML package description
-mkdir -p %{buildroot}/var/lib/pear
+mkdir -p %{buildroot}%{xmldir}
 tar -xzf %{SOURCE0} package2.xml
-cp -p package2.xml %{buildroot}/var/lib/pear/Net_SMTP.xml
+cp -p package2.xml %{buildroot}%{xmldir}/Net_SMTP.xml
 
 %clean
 rm -rf %{buildroot}
 
 %post
-pear install --nodeps --soft --force --register-only /var/lib/pear/Net_SMTP.xml
+pear install --nodeps --soft --force --register-only %{xmldir}/Net_SMTP.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
@@ -65,4 +69,4 @@ fi
 %defattr(-,root,root)
 %doc docs/Net_SMTP/{docs/examples/basic.php,docs/guide.txt}
 %{peardir}/*
-/var/lib/pear/Net_SMTP.xml
+%{xmldir}/Net_SMTP.xml

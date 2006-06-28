@@ -1,4 +1,5 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
+%define xmldir  /var/lib/pear
 
 Summary: PEAR: Generating CHAP packets.
 Name: PEAR::Crypt_CHAP
@@ -41,25 +42,26 @@ rm -rf %{buildroot}
 pear -c pearrc install --nodeps --packagingroot %{buildroot} %{SOURCE0}
         
 # Clean up unnecessary files
-rm -f pearrc
-rm -f %{buildroot}/%{peardir}/.filemap
-rm -f %{buildroot}/%{peardir}/.lock
+rm pearrc
+rm %{buildroot}/%{peardir}/.filemap
+rm %{buildroot}/%{peardir}/.lock
 rm -rf %{buildroot}/%{peardir}/.registry
 rm -rf %{buildroot}%{peardir}/.channels
-rm -rf %{buildroot}%{peardir}/.depdb*
+rm %{buildroot}%{peardir}/.depdb
+rm %{buildroot}%{peardir}/.depdblock
 
 
 
 # Install XML package description
-mkdir -p %{buildroot}/var/lib/pear
+mkdir -p %{buildroot}%{xmldir}
 tar -xzf %{SOURCE0} package.xml
-cp -p package.xml %{buildroot}/var/lib/pear/Crypt_CHAP.xml
+cp -p package.xml %{buildroot}%{xmldir}/Crypt_CHAP.xml
 
 %clean
 rm -rf %{buildroot}
 
 %post
-pear install --nodeps --soft --force --register-only /var/lib/pear/Crypt_CHAP.xml
+pear install --nodeps --soft --force --register-only %{xmldir}/Crypt_CHAP.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
@@ -70,4 +72,4 @@ fi
 %defattr(-,root,root)
 
 %{peardir}/*
-/var/lib/pear/Crypt_CHAP.xml
+%{xmldir}/Crypt_CHAP.xml
