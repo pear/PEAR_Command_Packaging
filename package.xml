@@ -42,7 +42,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <release>alpha</release>
   <api>alpha</api>
  </stability>
- <license uri="http://www.php.net/license">PHP License</license>
+ <license uri="http://www.php.net/license/3_01.txt">PHP License 3.01</license>
  <notes>
 - Add support for generation of external deps (e.g. PHP extensions) (bug #6971)
 - Add %l (lowercased package name) option to RPM pkgname/depname format strings
