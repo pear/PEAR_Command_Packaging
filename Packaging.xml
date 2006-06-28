@@ -2,7 +2,6 @@
  <make-rpm-spec>
   <summary>Builds an RPM spec file from a PEAR package</summary>
   <function>doMakeRPM</function>
-  <shortcut>rpm</shortcut>
   <options>
    <spec-template>
     <shortopt>t</shortopt>
