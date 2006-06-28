@@ -565,8 +565,6 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         if (isset($options['rpm-depname'])) {
             $this->_rpm_depname_format['pkg'] = $options['rpm-depname'];
-        } else {
-            $this->_rpm_depname_format['pkg'] = $this->_rpm_pkgname_format;
         }
     }
     
