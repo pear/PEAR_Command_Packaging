@@ -347,6 +347,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                     }
                     
                     if (!isset($dep['channel'])) $dep['channel'] = null;
+                    if (!isset($dep['name'])) $dep['name'] = ''; //e.g. "php" dep
                     // $package contains the *dependency name* here, which may or may
                     // not be the same as the package name
                     $package = $this->_getRPMName($dep['name'], $dep['channel'], $type);
