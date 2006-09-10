@@ -54,6 +54,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <tasks:replace from="@package_version@" to="version" type="package-info" />
    </file>
    <file name="template.spec" role="data" />
+   <file name="LICENSE" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
