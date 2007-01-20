@@ -12,7 +12,7 @@
  *
  * @category   pear
  * @package    PEAR
- * @author     Tim Jackson <timj@php.net>
+ * @author     Tim Jackson <tim@timj.co.uk>
  * @author     Greg Beaver <cellog@php.net>
  * @copyright  2006 The PHP Group
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
@@ -31,7 +31,7 @@ require_once 'PEAR/Command/Common.php';
  *
  * @category   pear
  * @package    PEAR
- * @author     Tim Jackson <timj@php.net>
+ * @author     Tim Jackson <tim@timj.co.uk>
  * @author     Greg Beaver <cellog@php.net>
  * @copyright  2006 The PHP Group
  * @license    http://www.php.net/license/3_01.txt  PHP License 3.01
