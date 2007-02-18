@@ -236,13 +236,13 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $info['doc_files_statement'] = '';
         $info['files'] = '';
         $info['package2xml'] = '';
-        $info['rpm_package'] = $this->_getRPMName($pf->getPackage(), $pf->getChannel());
+        $info['rpm_package'] = $this->_getRPMName(null, null, 'pkg', $pf);
         $info['pear_rpm_name'] = $this->_getRPMName('PEAR', 'pear.php.net', 'pkgdep');
         $info['description'] = wordwrap($info['description']);
         
         // Hook to support virtual provides, where the dependency name differs
         // from the package name
-        $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), 'pkgdep');
+        $rpmdep = $this->_getRPMName(null, null, 'pkgdep', $pf);
         if (!empty($rpmdep) && $rpmdep != $info['rpm_package']) {
             $info['extra_headers'] .= "Provides: $rpmdep = " . $pf->getVersion(). "\n";
         }
@@ -583,9 +583,13 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      *
      * @return string RPM name. If empty, assume there is no equivalent in RPM namespace.
      */
-    function _getRPMName($package_name, $chan_name=null, $type='pkg')
+    function _getRPMName($package_name, $chan_name=null, $type='pkg', $pf = null)
     {
-        $chan_alias = $this->_getChannelAlias($chan_name, $package_name);
+        if ($pf !== null) {
+            $package_name = $pf->getPackage();
+            $chan_name = $pf->getChannel();
+        }
+        $chan_alias = $this->_getChannelAlias(null, null, $pf);
         switch ($type) {
             case 'pkg':
                 return $this->_getRPMNameFromFormat($this->_rpm_pkgname_format, $package_name, $chan_alias);
@@ -639,7 +643,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 break;
             default:
                 $reg = &$this->config->getRegistry();
-                $chan = &$reg->getChannel($pf->getChannel());
+                $chan = &$reg->getChannel($chan_name);
                 $alias = $chan->getAlias();
                 $alias = strtoupper($alias);
                 break;
