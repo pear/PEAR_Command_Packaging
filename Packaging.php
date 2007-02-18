@@ -194,11 +194,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $pack = new PEAR_Downloader_Package($installer);
         $pack->setPackageFile($pf);
         $params[0] = &$pack;
-        $installer->setOptions(array('installroot' => $instroot,
+        $installer->setOptions(array('packagingroot' => $instroot,
                                           'nodeps' => true, 'soft' => true));
         $installer->setDownloadedPackages($params);
         $info = $installer->install($params[0],
-                                    array('installroot' => $instroot,
+                                    array('packagingroot' => $instroot,
                                           'nodeps' => true, 'soft' => true));
         $pkgdir = $pf->getPackage() . '-' . $pf->getVersion();
         $this->config->set('verbose', $tmp);
@@ -222,7 +222,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Work out the alias for the channel that this package is in
         $info['possible_channel'] = '';
-        $alias = $this->_getChannelAlias($pf->getChannel(), $pf->getPackage());
+        $alias = $this->_getChannelAlias(null, null, $pf);
         if ($alias != 'PEAR' && $alias != 'PECL') {
             $info['possible_channel'] = $pf->getChannel() . '/';
         }
@@ -611,8 +611,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      * @return string Channel alias (e.g. 'PECL')
      */
 
-    function _getChannelAlias($chan_name, $package_name = null)
+    function _getChannelAlias($package_name, $chan_name = null, $pf = null)
     {
+        if ($pf) {
+            $chan_name = $pf->getChannel();
+            $package_name = $pf->getPackage();
+        }
         switch($chan_name) {
             case null:
             case '':
