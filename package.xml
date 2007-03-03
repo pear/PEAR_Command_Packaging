@@ -42,7 +42,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <release>alpha</release>
   <api>alpha</api>
  </stability>
- <license uri="http://www.php.net/license/3_01.txt">PHP License 3.01</license>
+ <license filesource="LICENSE">PHP License 3.01</license>
  <notes>
 - fix Bug #9932: cannot build specs from external channels [cellog]
 - fix Bug #10116: fatal error when packaging packages from other channel [cellog]
