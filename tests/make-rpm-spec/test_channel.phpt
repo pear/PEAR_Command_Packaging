@@ -41,7 +41,6 @@ $phpunit->assertEquals(file_get_contents(
 );
 
 echo "tests done\n";
-die();
 ?>
 --CLEAN--
 <?php
