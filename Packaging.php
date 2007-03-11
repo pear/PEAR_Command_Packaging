@@ -213,7 +213,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      * packages (not channels)
      */
     var $_output_package = array(
-        'arch' => 'noarch',
+        'arch_statement' => '',  // empty string, or "BuildArchitecture: noarch" if definitely a noarch package
         'bin_dir' => '',
         'customrole_files_statement' => '',// empty string, or list of files with custom roles
         'data_dir' => '',
@@ -584,14 +584,10 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // Work out architecture
         // If there are 1 or more files with role="src", something needs compiling
         // and this is not a noarch package
-        if (isset($file_list['src'])) {
-            require_once 'OS/Guess.php';
-            $os = new OS_Guess;
-            $arch = $os->getCpu();
-        } else {
-            $arch = 'noarch';
+        if (!isset($file_list['src'])) {
+            $this->_output['arch_statement'] = "BuildArch: noarch\n";
         }
-        $this->_output['arch'] = $arch;
+        
         
         // If package is not from pear.php.net or pecl.php.net, we will need
         // to BuildRequire/Require a channel RPM

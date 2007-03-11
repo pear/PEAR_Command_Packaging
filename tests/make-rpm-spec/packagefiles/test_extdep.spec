@@ -10,9 +10,9 @@ Group: Development/Libraries
 Source0: http://pear.php.net/get/Crypt_CHAP-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.php.net/package/Crypt_CHAP
-BuildArchitectures: noarch
 BuildRequires: PEAR::PEAR >= 1.4.7
 Requires: php-mhash, php-mcrypt
+BuildArch: noarch
 
 %description
 This package provides Classes for generating CHAP packets.

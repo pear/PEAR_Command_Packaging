@@ -10,10 +10,10 @@ Group: Development/Libraries
 Source0: http://pear.php.net/get/Net_SMTP-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.php.net/package/Net_SMTP
-BuildArchitectures: noarch
 BuildRequires: php-pear(PEAR) >= 1.4.7
 Requires: php-pear(Net_Socket)
 Provides: php-pear(Net_SMTP) = 1.2.8
+BuildArch: noarch
 
 %description
 Provides an implementation of the SMTP protocol using PEAR's Net_Socket

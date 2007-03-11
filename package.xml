@@ -101,6 +101,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  - @customrole_files_statement@
  All of these are "intelligent" in that they are empty if no files of the given type exist, plus if files do exist and are in a subdirectory dedicated to the package being RPM-ified, then make-rpm-spec will just put the top level directory in the substitution, rather than a complete file list - this makes for much shorter specs in some cases. Use of the @XXX_files_statement@ substitutions is encouraged in favour of the @files@ substitution.
 - Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
+- Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
 - Fix a bug if PEAR/PackageFile.php was already included
 - Internal refactoring/cleanup
 - Require PHP 4.3.0+ to avoid internal cruft

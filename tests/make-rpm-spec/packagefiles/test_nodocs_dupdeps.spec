@@ -10,9 +10,9 @@ Group: Development/Libraries
 Source0: http://pear.php.net/get/PEAR_Command_Packaging-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.php.net/package/PEAR_Command_Packaging
-BuildArchitectures: noarch
 BuildRequires: PEAR::PEAR >= 1.4.7
 Requires: PEAR::PEAR >= 1.4.7
+BuildArch: noarch
 
 %description
 This command is an improved implementation of the standard makerpm command,
