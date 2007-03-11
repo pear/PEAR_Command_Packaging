@@ -1,0 +1,10 @@
+# files
+@files@
+# php_files_statement
+@php_files_statement@
+# data_files_statement
+@data_files_statement@
+# test_files_statement
+@test_files_statement@
+# script_files_statement
+@script_files_statement@

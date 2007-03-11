@@ -479,6 +479,15 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // Install the package into a temporary directory
         $tmpdir = $this->makeTempDir();
         $instroot = $this->makeTempDir();
+        
+        // Set the role prefixes - package won't actually be installed here
+        // but we can pull the proper paths back out later.
+        foreach ($this->_file_prefixes as $role => $prefix) {
+        	// if role is 'script' the corresponding option is bin_dir
+        	if ($role == 'script') $role = 'bin';
+	        $this->config->set("${role}_dir", $prefix);
+        }
+        
         $tmp = $this->config->get('verbose');
         $this->config->set('verbose', 0);
         $installer = $this->getInstaller($this->ui);
@@ -537,13 +546,17 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Create the list of files in the package
         foreach ($package_info['filelist'] as $filename => $attr) {
-            // Ignore files with no role set
-            if (!isset($attr['role'])) {
+            // Ignore files with no role set or that didn't get installed
+            if (!isset($attr['role']) || !isset($attr['installed_as'])) {
                 continue;
-            }        
+            }
+            $installed_filename = $attr['installed_as'];
             $role = $attr['role'];
             
             // Handle custom roles; set prefix
+            // TODO: This is not tested and probably doesn't work, because:
+            // a) package probably needs a custom file role package to build
+            // b) [role]_dir wasn't set earlier before we did the test install
             if (!isset($this->_file_prefixes[$role])) {
                 $this->_file_prefixes[$role] = $this->_file_prefixes['php'] . "/$role/%s";
                 $this->_output['extra_config'] .=
@@ -553,12 +566,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                     ' - hand-edit the final .spec if this is wrong', $command);
             }
             
-            // Some kind of cleanup? What's this for?    
-            $filename = preg_replace('![/:\\\\]!', '/', $filename);
-            $filename = str_replace('\\', '/', $filename);
-            
             // Add to master file list
-            $file_list[$role][] = $filename;
+            $file_list[$role][] = $installed_filename;
         }
         
         // Build the master file lists
@@ -566,11 +575,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             // Docs are handled separately below; 'src' shouldn't be in RPM
             if ($role == 'doc' || $role == 'src') continue; 
             
-            // Get the prefix for the file
-            $prefix = str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]);
-            
             // Master file list @files@ - recommended not to use
-            $this->_output['files'] .= "$prefix/" . implode("\n$prefix/", $files) . "\n";
+            $this->_output['files'] .= implode("\n", $files) . "\n";
             
             // Handle other roles specially: if the role puts files in a subdir
             // dedicated to the package in question (i.e. the prefix ends with 
@@ -581,9 +587,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 $macro_name = 'customrole_files_statement';
             }
             if (substr($this->_file_prefixes[$role], -2) == '%s') {
-                $this->_output[$macro_name] = $prefix;
+                $this->_output[$macro_name] = str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]);
             } else {
-                $this->_output[$macro_name] = "$prefix/" . implode("\n$prefix/", $files);
+                $this->_output[$macro_name] = implode("\n", $files);
             }
         }
         $this->_output['files'] = trim($this->_output['files']);
