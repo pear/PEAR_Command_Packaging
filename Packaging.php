@@ -182,7 +182,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         if (!class_exists('PEAR_Common')) {
             require_once 'PEAR/Common.php';
         }
-        if (!class_exists('PEAR/PackageFile.php')) {
+        if (!class_exists('PEAR_PackageFile')) {
             require_once 'PEAR/PackageFile.php';
         }
         $a = &new PEAR_PackageFile($config, $debug, $tmpdir);
