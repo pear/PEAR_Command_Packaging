@@ -183,7 +183,6 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'php' => '%{_libdir}/php/pear',
         'doc' => '',
         'ext' => '%{_libdir}/php',
-        'src' => '%{_includedir}/php',
         'test' => '%{_libdir}/php/tests/%s',
         'data' => '%{_libdir}/php/data/%s',
         'script' => '%{_bindir}'
@@ -546,8 +545,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Build the master file lists
         foreach ($file_list as $role => $files) {
-            // docs are handled separately below
-            if ($role == 'doc') continue; 
+            // Docs are handled separately below; 'src' shouldn't be in RPM
+            if ($role == 'doc' || $role == 'src') continue; 
             
             // Get the prefix for the file
             $prefix = str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]);

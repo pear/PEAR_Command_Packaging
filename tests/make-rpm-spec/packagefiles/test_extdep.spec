@@ -25,7 +25,6 @@ For MS-CHAP the mhash and mcrypt extensions must be loaded.
 
 %prep
 %setup -c -T
-# XXX Source files location is missing here in pear cmd
 pear -v -c pearrc \
         -d php_dir=%{peardir} \
         -d doc_dir=/docs \

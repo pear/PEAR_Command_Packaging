@@ -19,7 +19,6 @@ BuildRequires: @pear_rpm_name@ >= 1.4.7
 
 %prep
 %setup -c -T
-# XXX Source files location is missing here in pear cmd
 pear -v -c pearrc \
         -d php_dir=%{peardir} \
         -d doc_dir=/docs \
