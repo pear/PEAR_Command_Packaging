@@ -104,6 +104,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     // BEGIN DISTRIBUTION CONFIG
     // This is the start of configuration options that might need to be patched
     // by downstream distributors
+    // TODO: all this stuff should be settable via $options really
     // ------------------------------------------------------------------------
     
     /**
@@ -188,6 +189,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'script' => '%{_bindir}'
     );
     
+    /**
+     * The format to use when adding new RPM header lines to the spec file, in
+     * printf format. The first '%s' is the RPM header name, the second is the
+     * value.
+     */
+    var $_spec_line_format = '%s: %s';
     
     // ------------------------------------------------------------------------
     // --- END DISTRIBUTION CONFIG
@@ -357,6 +364,17 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     }
     
     /**
+     * Format an RPM header line to be added to the spec file
+     * @param  string $header The name of the RPM header to be added 
+     * @param  string $value  The contents of the RPM header
+     * @return string
+     */
+    function _formatRpmHeader($header, $value)
+    {
+        return sprintf($this->_spec_line_format, $header, $value);
+    }
+    
+    /**
      * Replace a macro in the output spec file
      * @return string
      */
@@ -514,7 +532,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // from the package name
         $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkgdep');
         if (!empty($rpmdep) && $rpmdep != $this->_output['rpm_package']) {
-            $this->_output['extra_headers'] .= "Provides: $rpmdep = " . $pf->getVersion(). "\n";
+            $this->_output['extra_headers'] .= $this->_formatRpmHeader('Provides', "$rpmdep = " . $pf->getVersion()) . "\n";
         }
         
         // Create the list of files in the package
@@ -585,7 +603,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // If there are 1 or more files with role="src", something needs compiling
         // and this is not a noarch package
         if (!isset($file_list['src'])) {
-            $this->_output['arch_statement'] = "BuildArch: noarch\n";
+            $this->_output['arch_statement'] = $this->_formatRpmHeader('BuildArch', 'noarch') . "\n";
         }
         
         
@@ -593,8 +611,8 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // to BuildRequire/Require a channel RPM
         if (!empty($this->_output['possible_channel']) && !in_array($this->_output['possible_channel'], array('pear.php.net','pecl.php.net'))) {
             $channel_dep = $this->_getRPMName($this->_output['package'], $this->_output['possible_channel'], null, 'chandep');
-            $this->_output['extra_headers'] .= "BuildRequires: $channel_dep\n";
-            $this->_output['extra_headers'] .= "Requires: $channel_dep\n";
+            $this->_output['extra_headers'] .= $this->_formatRpmHeader('BuildRequires', $channel_dep) . "\n";
+            $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', $channel_dep) . "\n";
         }
         
         // Remove any trailing newline from extra_headers
@@ -654,10 +672,10 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 }
             }
             if (count($requires)) {
-                $this->_output['extra_headers'] .= 'Requires: ' . implode(', ', $requires) . "\n";
+                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', implode(', ', $requires)) . "\n";
             }
             if (count($conflicts)) {
-                $this->_output['extra_headers'] .= 'Conflicts: ' . implode(', ', $conflicts) . "\n";
+                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', $conflicts)) . "\n";
             }
         } else {
             $this->_output['package2xml'] = '2'; // tell the spec to use package2.xml
@@ -789,10 +807,10 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         $deps['required']['pearinstaller']['min'];
                 }
                 if (count($requires)) {
-                    $this->_output['extra_headers'] .= 'Requires: ' . implode(', ', $requires) . "\n";
+                    $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', implode(', ', $requires)) . "\n";
                 }
                 if (count($conflicts)) {
-                    $this->_output['extra_headers'] .= 'Conflicts: ' . implode(', ', $conflicts) . "\n";
+                    $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', $conflicts)) . "\n";
                 }
             }
         }

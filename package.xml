@@ -103,6 +103,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 - Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
 - Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
 - Fix a bug if PEAR/PackageFile.php was already included
+- Add $_spec_line_format config option to allow distributors to tune the format that additional RPM headers are added to the spec in, to match their conventions
 - Internal refactoring/cleanup
 - Require PHP 4.3.0+ to avoid internal cruft
    </notes>
