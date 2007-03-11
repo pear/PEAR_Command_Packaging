@@ -12,7 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.php.net/package/Net_SMTP
 BuildRequires: php-pear(PEAR) >= 1.4.7
 Requires: php-pear(Net_Socket)
-Provides: php-pear(Net_SMTP) = 1.2.8
+Provides: php-pear(Net_SMTP) = %{version}
 BuildArch: noarch
 
 %description

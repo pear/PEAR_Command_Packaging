@@ -532,7 +532,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // from the package name
         $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkgdep');
         if (!empty($rpmdep) && $rpmdep != $this->_output['rpm_package']) {
-            $this->_output['extra_headers'] .= $this->_formatRpmHeader('Provides', "$rpmdep = " . $pf->getVersion()) . "\n";
+            $this->_output['extra_headers'] .= $this->_formatRpmHeader('Provides', "$rpmdep = %{version}") . "\n";
         }
         
         // Create the list of files in the package
