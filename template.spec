@@ -1,5 +1,5 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
-%define xmldir  @rpm_xml_dir@
+%define xmldir  /var/lib/pear
 
 Summary: PEAR: @summary@
 Name: @rpm_package@
