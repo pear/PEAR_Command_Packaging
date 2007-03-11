@@ -590,11 +590,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Handle doc files
         if (isset($file_list['doc'])) {
-            if (count($file_list['doc']) > 1) {
-                $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/{' . implode(',', $file_list['doc']) . '}';
-            } else {
-                $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/' . $file_list['doc'][0];
-            }
+            $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/*';
             $this->_output['doc_files_statement'] = '%doc ' . $this->_output['doc_files'];
             $this->_output['doc_files_relocation_script'] = "mv %{buildroot}/docs .\n";
         }
