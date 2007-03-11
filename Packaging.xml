@@ -23,7 +23,9 @@ are as follows:
 %S = PEAR package name (with underscores replaced with hyphens)
 %C = Channel alias
 %c = Channel alias, lowercased
-Defaults to "%C::%s".</doc>
+%n = Channel name (full) e.g. pear.example.com
+Defaults to "%C::%s" for library/application packages and "php-channel-%c" for 
+channel packages.</doc>
    </rpm-pkgname>
    <rpm-depname>
     <shortopt>d</shortopt>
@@ -35,9 +37,9 @@ the format defined by the --rpm-pkgname option.</doc>
   </options>
   <doc>&lt;package-file&gt;
 
-Creates an RPM .spec file for wrapping a PEAR package inside an RPM
-package.  Intended to be used from the SPECS directory, with the PEAR
-package tarball in the SOURCES directory:
+Creates an RPM .spec file for wrapping a PEAR package or channel definition 
+inside an RPM package.  Intended to be used from the SPECS directory, with the 
+PEAR package tarball in the SOURCES directory:
 
 $ cd /path/to/rpm-build-tree/SPECS
 $ pear make-rpm-spec ../SOURCES/Net_Socket-1.0.tgz

@@ -71,7 +71,8 @@ are as follows:
 %c = Channel alias, lowercased
 %n = Channel name (full) e.g. pear.example.com
 
-Defaults to "%C::%s".',
+Defaults to "%C::%s" for library/application packages and "php-channel-%c" for 
+channel packages.',
                     ),
                 'rpm-depname' => array(
                     'shortopt' => 'd',
@@ -83,9 +84,9 @@ the format defined by the --rpm-pkgname option.',
                 ),
             'doc' => '<package-file>
 
-Creates an RPM .spec file for wrapping a PEAR package inside an RPM
-package.  Intended to be used from the SPECS directory, with the PEAR
-package tarball in the SOURCES directory:
+Creates an RPM .spec file for wrapping a PEAR package or channel definition 
+inside an RPM package.  Intended to be used from the SPECS directory, with the 
+PEAR package tarball in the SOURCES directory:
 
 $ cd /path/to/rpm-build-tree/SPECS
 $ pear make-rpm-spec ../SOURCES/Net_Socket-1.0.tgz
@@ -99,34 +100,104 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
 
     var $output;
     
-    // The default format of the RPM package name
+    // ------------------------------------------------------------------------
+    // BEGIN DISTRIBUTION CONFIG
+    // This is the start of configuration options that might need to be patched
+    // by downstream distributors
+    // ------------------------------------------------------------------------
+    
+    /**
+     * The default format of the RPM package name. See above for possible
+     * substitution variables.
+     *
+     * There are two elements in the array:
+     *
+     * pkg - used when generating a spec file for an actual library/application
+     * chan - used when generating a spec file for a channel
+     *
+     * If you change these, you will want to patch the documentation in the
+     * $commands array above and in Packaging.xml so that it is consistent.
+     */
     var $_rpm_pkgname_format = array(
-        'pkg' => '%C::%s',
+        'pkg'  => '%C::%s',
         'chan' => 'php-channel-%c',
     );
     
-    // The default format of various dependencies that might be generated in the
-    // spec file.
-    // NULL = "don't generate a dep".
-    // %P   = use the same as whatever rpm_pkgname_format is set to be
+    /**
+     * The default format of various dependencies that might be generated in the
+     * spec file. The currently-handled dependency types are:
+     *
+     * pkg  = another PEAR package
+     * ext  = a PHP extension
+     * php  = PHP itself
+     * chan = a PEAR installer-based channel
+     *
+     * In each one:
+     *
+     * NULL = don't generate a dependency
+     * %P   = use the same as whatever rpm_pkgname_format is set to be
+     */
     var $_rpm_depname_format = array(
-        'pkg' => '%P',
-        'ext' => 'php-%l',
-        'php' => 'php',
+        'pkg'  => '%P',
+        'ext'  => 'php-%l',
+        'php'  => 'php',
         'chan' => 'php-channel(%n)',
     );
     
-    // Format of the filename for the output spec file. Substitutions are as per 
-    // the rpm-pkgname format string, with the addition of:
-    // %v = package version
-    // %P = use the same as whatever rpm_pkgname_format is set to be
+    /**
+     * Format of the filename for the output spec file. Substitutions are as per 
+     * the rpm-pkgname format string, with the addition of:
+     *
+     * %v = package version
+     * %P = use the same as whatever rpm_pkgname_format is set to be
+     *
+     * There are two elements in the array:
+     *
+     * pkg  - used when generating a spec file for an actual library/application
+     * chan - used when generating a spec file for a channel
+     */
     var $_rpm_specname_format = array(
-        'pkg' => '%P-%v.spec',
+        'pkg'  => '%P-%v.spec',
         'chan' => 'php-channel-%c.spec'
     );
     
-    // The final output substitutions which will be put into the RPM spec 
-    // template. Common to the generation of specs for both channels and packages 
+    /**
+     * File prefixes to use for the standard file roles. Used when generating
+     * specs for packages only. It's OK to use RPM macros here; these file
+     * paths are not used internally, only for putting in the output spec file.
+     *
+     * Don't include trailing slashes.
+     *
+     * The %s (PEAR package name) substitution is understood, and if this is
+     * used *and* it is at the end of the string, then make-rpm-spec will be
+     * intelligent and include just the top level directory in the corresponding 
+     * "[role]_files_statement" macro instead of listing *all* the files in that
+     * subdirectory. That makes for cleaner specs and means that the output
+     * package will own that directory.
+     *
+     * NB that 'doc' is handled specially and should normally be empty
+     * Files with role='src' should not appear in final package so do not
+     * need to be listed here
+     */
+    var $_file_prefixes = array(
+        'php' => '%{_libdir}/php/pear',
+        'doc' => '',
+        'ext' => '%{_libdir}/php',
+        'src' => '%{_includedir}/php',
+        'test' => '%{_libdir}/php/tests/%s',
+        'data' => '%{_libdir}/php/data/%s',
+        'script' => '%{_bindir}'
+    );
+    
+    
+    // ------------------------------------------------------------------------
+    // --- END DISTRIBUTION CONFIG
+    // ------------------------------------------------------------------------
+    
+    /**
+     * The final output substitutions which will be put into the RPM spec 
+     * template. Common to the generation of specs for both channels and packages 
+     */
     var $_output = array(
         'channel_alias' => '',   // channel alias
         'master_server' => '',   // download server for package/channel
@@ -135,20 +206,23 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'release' => 1,          // RPM release number
         'release_license' => '', // license
         'rpm_package' => '',     // the output RPM package name (RPMified)
-        'rpm_xml_dir' => '/var/lib/pear', // directory to save package/channel XML files in on the end system
         'version' => '',         // the (source) package version
     );
     
-    // Final output substitutions that are only used when generating specs for
-    // packages (not channels)
+    /**
+     * Final output substitutions that are only used when generating specs for
+     * packages (not channels)
+     */
     var $_output_package = array(
         'arch' => 'noarch',
         'bin_dir' => '',
+        'customrole_files_statement' => '',// empty string, or list of files with custom roles
         'data_dir' => '',
+        'data_files_statement' => '',// empty string, or list of data files
         'doc_dir' => '',
-        'doc_files' => array(),
-        'doc_files_relocation_script' => '',
-        'doc_files_statement' => '',
+        'doc_files' => '',
+        'doc_files_relocation_script' => '', // doc files relocation script, if needed
+        'doc_files_statement' => '', // empty string, or list of doc files preceded with %doc
         'ext_dir' => '',
         'extra_config' => '',
         'extra_headers' => '',
@@ -156,9 +230,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'package' => '',         // the (source) package name
         'package2xml' => '',     // either empty string, or number "2" if using package.xml v2
         'php_dir' => '',
+        'php_files_statement' => '', // empty string, or list of php files
         'release_state' => '',   // stable, unstable etc
+        'script_files_statement' => '',
         'summary' => '',
         'test_dir' => '',
+        'test_files_statement' => '',// empty string, or list of test files
     );
     
     // The name of the template spec file to use
@@ -413,99 +490,109 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->_output['summary'] = $package_info['summary'];
         $this->_output['possible_channel'] = $pf->getChannel();
         $this->_output['channel_alias'] = $this->_getChannelAlias($pf->getPackage(), $pf->getChannel());
+        $this->_output['package'] = $pf->getPackage();
+        $this->_output['version'] = $pf->getVersion();
+        $this->_output['release_license'] = $pf->getLicense();
+        $this->_output['release_state'] = $pf->getState();
+
+        // Figure out the master server for the package's channel
+        $chan = $reg->getChannel($pf->getChannel());
+        $this->_output['master_server'] = $chan->getServer();
+
+        // Put some standard PEAR config options into the output macros. These
+        // will probably be deprecated in v0.2.x
+        $cfg = array('php_dir', 'ext_dir', 'doc_dir', 'bin_dir', 'data_dir', 'test_dir');
+        foreach ($cfg as $k) {
+            $this->_output[$k] = $this->config->get($k);
+        }
+
+        // Generate the Requires and Conflicts for the RPM
+        if ($pf->getDeps()) {
+            $this->_generatePackageDeps($pf);
+        }
     
-    
-        // Hook to support virtual provides, where the dependency name differs
+        // Hook to support virtual Provides, where the dependency name differs
         // from the package name
         $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkgdep');
         if (!empty($rpmdep) && $rpmdep != $this->_output['rpm_package']) {
             $this->_output['extra_headers'] .= "Provides: $rpmdep = " . $pf->getVersion(). "\n";
         }
-    
-        $srcfiles = 0;
-        foreach ($package_info['filelist'] as $name => $attr) {
+        
+        // Create the list of files in the package
+        foreach ($package_info['filelist'] as $filename => $attr) {
+            // Ignore files with no role set
             if (!isset($attr['role'])) {
                 continue;
+            }        
+            $role = $attr['role'];
+            
+            // Handle custom roles; set prefix
+            if (!isset($this->_file_prefixes[$role])) {
+                $this->_file_prefixes[$role] = $this->_file_prefixes['php'] . "/$role/%s";
+                $this->_output['extra_config'] .=
+                    "\n        -d ${role}_dir=" . $this->_file_prefixes[$role] . "\\";
+                $this->ui->outputData("WARNING: role '$role' used, " .
+                    'and will be installed in "' . $this->_file_prefixes[$role] .
+                    ' - hand-edit the final .spec if this is wrong', $command);
             }
-            $name = preg_replace('![/:\\\\]!', '/', $name);
-            if ($attr['role'] == 'doc') {
-                $this->_output['doc_files'][] .= $name;
-            // Map role to the rpm vars
-            } else {
-                $c_prefix = '%{_libdir}/php/pear';
-                switch ($attr['role']) {
-                    case 'php':
-                        $prefix = $c_prefix;
-                    break;
-                    case 'ext':
-                        $prefix = '%{_libdir}/php';
-                    break; // XXX good place?
-                    case 'src':
-                        $srcfiles++;
-                        $prefix = '%{_includedir}/php';
-                    break; // XXX good place?
-                    case 'test':
-                        $prefix = "$c_prefix/tests/" . $pf->getPackage();
-                    break;
-                    case 'data':
-                        $prefix = "$c_prefix/data/" . $pf->getPackage();
-                    break;
-                    case 'script':
-                        $prefix = '%{_bindir}';
-                    break;
-                    default: // non-standard roles
-                        $prefix = "$c_prefix/$attr[role]/" . $pf->getPackage();
-                        $this->_output['extra_config'] .=
-                        "\n        -d {$attr[role]}_dir=$c_prefix/{$attr[role]} \\";
-                        $this->ui->outputData('WARNING: role "' . $attr['role'] . '" used, ' .
-                            'and will be installed in "' . $c_prefix . '/' . $attr['role'] .
-                            '/' . $pf->getPackage() .
-                            ' - hand-edit the final .spec if this is wrong', $command);
-                    break;
-                }
-                $name = str_replace('\\', '/', $name);
-                $this->_output['files'] .= "$prefix/$name\n";
-            }
+            
+            // Some kind of cleanup? What's this for?    
+            $filename = preg_replace('![/:\\\\]!', '/', $filename);
+            $filename = str_replace('\\', '/', $filename);
+            
+            // Add to master file list
+            $file_list[$role][] = $filename;
         }
         
-        $ndocs = count($this->_output['doc_files']);
-        if ($ndocs > 1) {
-            $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/{' . implode(',', $this->_output['doc_files']) . '}';
-        } elseif ($ndocs > 0) {
-            $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/' . $this->_output['doc_files'][0];
-        } else {
-            $this->_output['doc_files'] = '';
+        // Build the master file lists
+        foreach ($file_list as $role => $files) {
+            // docs are handled separately below
+            if ($role == 'doc') continue; 
+            
+            // Get the prefix for the file
+            $prefix = str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]);
+            
+            // Master file list @files@ - recommended not to use
+            $this->_output['files'] .= "$prefix/" . implode("\n$prefix/", $files) . "\n";
+            
+            // Handle other roles specially: if the role puts files in a subdir
+            // dedicated to the package in question (i.e. the prefix ends with 
+            // %s) we don't need to specify all the individual files
+            if (in_array($role, array('php','test','data','script'))) {
+                $macro_name = "${role}_files_statement";
+            } else {
+                $macro_name = 'customrole_files_statement';
+            }
+            if (substr($this->_file_prefixes[$role], -2) == '%s') {
+                $this->_output[$macro_name] = $prefix;
+            } else {
+                $this->_output[$macro_name] = "$prefix/" . implode("\n$prefix/", $files);
+            }
         }
-        if (!empty($this->_output['doc_files'])) {
+        $this->_output['files'] = trim($this->_output['files']);
+        
+        // Handle doc files
+        if (isset($file_list['doc'])) {
+            if (count($file_list['doc']) > 1) {
+                $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/{' . implode(',', $file_list['doc']) . '}';
+            } else {
+                $this->_output['doc_files'] = 'docs/' . $pf->getPackage() . '/' . $file_list['doc'][0];
+            }
             $this->_output['doc_files_statement'] = '%doc ' . $this->_output['doc_files'];
             $this->_output['doc_files_relocation_script'] = "mv %{buildroot}/docs .\n";
         }
         
-        if ($srcfiles > 0) {
+        // Work out architecture
+        // If there are 1 or more files with role="src", something needs compiling
+        // and this is not a noarch package
+        if (isset($file_list['src'])) {
             require_once 'OS/Guess.php';
             $os = new OS_Guess;
             $arch = $os->getCpu();
         } else {
             $arch = 'noarch';
         }
-        $cfg = array('master_server', 'php_dir', 'ext_dir', 'doc_dir',
-                        'bin_dir', 'data_dir', 'test_dir');
-        foreach ($cfg as $k) {
-            if ($k == 'master_server') {
-                $chan = $reg->getChannel($pf->getChannel());
-                $this->_output[$k] = $chan->getServer();
-                continue;
-            }
-            $this->_output[$k] = $this->config->get($k);
-        }
         $this->_output['arch'] = $arch;
-        $this->_output['package'] = $pf->getPackage();
-        $this->_output['version'] = $pf->getVersion();
-        $this->_output['release_license'] = $pf->getLicense();
-        $this->_output['release_state'] = $pf->getState();
-        if ($pf->getDeps()) {
-            $this->_generatePackageDeps($pf);
-        }
         
         // If package is not from pear.php.net or pecl.php.net, we will need
         // to BuildRequire/Require a channel RPM

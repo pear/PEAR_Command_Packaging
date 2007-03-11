@@ -89,10 +89,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <date>2007-02-17</date>
    <license uri="http://www.php.net/license/3_01.txt">PHP License 3.01</license>
    <notes>
-- Can now build specs for channels as well as packages
+- NEW: Can now build specs for channels as well as packages
 - Can now build specs for packages from channels other than pear.php.net (bug #9932, bug #10116, bug #10254)
 - @possible_channel@ now doesn't include a trailing slash (template.spec changed to accommodate)
 - @possible_channel@ is now filled even if channel is pecl.php.net/pear.php.net - this is part of moving towards a less pear.php.net-centric system where the core PEAR channels are not particularly "special"
+- Add the following macros:
+ - @php_files_statement@
+ - @test_files_statement@
+ - @data_files_statement@
+ - @script_files_statement@
+ - @customrole_files_statement@
+ All of these are "intelligent" in that they are empty if no files of the given type exist, plus if files do exist and are in a subdirectory dedicated to the package being RPM-ified, then make-rpm-spec will just put the top level directory in the substitution, rather than a complete file list - this makes for much shorter specs in some cases. Use of the @XXX_files_statement@ substitutions is encouraged in favour of the @files@ substitution.
+- Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
 - Fix a bug if PEAR/PackageFile.php was already included
 - Internal refactoring/cleanup
 - Require PHP 4.3.0+ to avoid internal cruft
