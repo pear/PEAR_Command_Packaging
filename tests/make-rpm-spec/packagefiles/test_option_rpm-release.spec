@@ -61,7 +61,7 @@ pear install --nodeps --soft --force --register-only %{xmldir}/Net_SMTP.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
-    pear uninstall --nodeps --ignore-errors --register-only Net_SMTP
+    pear uninstall --nodeps --ignore-errors --register-only pear.php.net/Net_SMTP
 fi
 
 %files

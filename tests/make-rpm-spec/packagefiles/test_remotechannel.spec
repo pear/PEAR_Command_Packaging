@@ -1,27 +1,22 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
 %define xmldir  /var/lib/pear
 
-Summary: PEAR: Generating CHAP packets.
-Name: PEAR::Crypt_CHAP
-Version: 1.0.0
+Summary: PEAR: A test package
+Name: example::Test_Package
+Version: 1.1.0
 Release: 1
-License: BSD
+License: Foo License
 Group: Development/Libraries
-Source0: http://pear.php.net/get/Crypt_CHAP-%{version}.tgz
+Source0: http://pear.example.com/get/Test_Package-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
-URL: http://pear.php.net/package/Crypt_CHAP
+URL: http://pear.example.com/package/Test_Package
 BuildArchitectures: noarch
 BuildRequires: PEAR::PEAR >= 1.4.7
-Requires: php-mhash, php-mcrypt
+BuildRequires: php-channel(pear.example.com)
+Requires: php-channel(pear.example.com)
 
 %description
-This package provides Classes for generating CHAP packets.
-Currently these types of CHAP are supported:
-* CHAP-MD5
-* MS-CHAPv1
-* MS-CHAPv2
-For MS-CHAP the mhash and mcrypt extensions must be loaded.
-
+Whatever
 
 %prep
 %setup -c -T
@@ -54,22 +49,22 @@ rm %{buildroot}%{peardir}/.depdblock
 
 # Install XML package description
 mkdir -p %{buildroot}%{xmldir}
-tar -xzf %{SOURCE0} package.xml
-cp -p package.xml %{buildroot}%{xmldir}/Crypt_CHAP.xml
+tar -xzf %{SOURCE0} package2.xml
+cp -p package2.xml %{buildroot}%{xmldir}/Test_Package.xml
 
 %clean
 rm -rf %{buildroot}
 
 %post
-pear install --nodeps --soft --force --register-only %{xmldir}/Crypt_CHAP.xml
+pear install --nodeps --soft --force --register-only %{xmldir}/Test_Package.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
-    pear uninstall --nodeps --ignore-errors --register-only pear.php.net/Crypt_CHAP
+    pear uninstall --nodeps --ignore-errors --register-only pear.example.com/Test_Package
 fi
 
 %files
 %defattr(-,root,root)
 
 %{peardir}/*
-%{xmldir}/Crypt_CHAP.xml
+%{xmldir}/Test_Package.xml

@@ -59,7 +59,7 @@ pear install --nodeps --soft --force --register-only %{xmldir}/@package@.xml
 
 %postun
 if [ "$1" -eq "0" ]; then
-    pear uninstall --nodeps --ignore-errors --register-only @possible_channel@@package@
+    pear uninstall --nodeps --ignore-errors --register-only @possible_channel@/@package@
 fi
 
 %files

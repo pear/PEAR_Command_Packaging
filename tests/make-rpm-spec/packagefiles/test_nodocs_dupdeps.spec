@@ -74,7 +74,7 @@ pear install --nodeps --soft --force --register-only %{xmldir}/PEAR_Command_Pack
 
 %postun
 if [ "$1" -eq "0" ]; then
-    pear uninstall --nodeps --ignore-errors --register-only PEAR_Command_Packaging
+    pear uninstall --nodeps --ignore-errors --register-only pear.php.net/PEAR_Command_Packaging
 fi
 
 %files

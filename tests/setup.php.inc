@@ -39,25 +39,26 @@ if (!is_dir($temp_path . DIRECTORY_SEPARATOR . 'cache')) {
     mkdir($temp_path . DIRECTORY_SEPARATOR . 'cache');
 }
 // make the fake configuration - we'll use one of these and it should work
-$config = serialize(array('master_server' => $server,
-    'preferred_state' => 'stable',
-    'cache_dir' => $temp_path . DIRECTORY_SEPARATOR . 'cache',
-    'php_dir' => $temp_path . DIRECTORY_SEPARATOR . 'php',
-    'ext_dir' => $temp_path . DIRECTORY_SEPARATOR . 'ext',
-    'data_dir' => $temp_path . DIRECTORY_SEPARATOR . 'data',
-    'doc_dir' => $temp_path . DIRECTORY_SEPARATOR . 'doc',
-    'test_dir' => $temp_path . DIRECTORY_SEPARATOR . 'test',
-    'bin_dir' => $temp_path . DIRECTORY_SEPARATOR . 'bin',));
+$config = serialize(
+    array(
+        'master_server' => $server,
+        'preferred_state' => 'stable',
+        'cache_dir' => $temp_path . DIRECTORY_SEPARATOR . 'cache',
+        'php_dir' => $temp_path . DIRECTORY_SEPARATOR . 'php',
+        'ext_dir' => $temp_path . DIRECTORY_SEPARATOR . 'ext',
+        'data_dir' => $temp_path . DIRECTORY_SEPARATOR . 'data',
+        'doc_dir' => $temp_path . DIRECTORY_SEPARATOR . 'doc',
+        'test_dir' => $temp_path . DIRECTORY_SEPARATOR . 'test',
+        'bin_dir' => $temp_path . DIRECTORY_SEPARATOR . 'bin',
+    )
+);
 touch($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
 $fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.conf', 'w');
 fwrite($fp, $config);
 fclose($fp);
+
 touch($temp_path . DIRECTORY_SEPARATOR . 'pear.ini');
 $fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.ini', 'w');
-fwrite($fp, $config);
-fclose($fp);
-touch($temp_path . DIRECTORY_SEPARATOR . 'pear.conf');
-$fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'pear.conf', 'w');
 fwrite($fp, $config);
 fclose($fp);
 
@@ -86,7 +87,8 @@ class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 
     function &getInstaller()
     {
-        $a = &new test_PEAR_Installer($this->ui, array(), $this->config);
+        $a = &new test_PEAR_Installer($this->ui);
+        $a->setConfig($this->config);
         return $a;
     }
 	
