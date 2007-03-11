@@ -1,7 +1,7 @@
 %define peardir %(pear config-get php_dir 2> /dev/null || echo %{_datadir}/pear)
 %define xmldir  /var/lib/pear
 
-Summary: PEAR: Generating CHAP packets.
+Summary: PEAR: Generating CHAP packets
 Name: PEAR::Crypt_CHAP
 Version: 1.0.0
 Release: 1

@@ -66,6 +66,6 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc docs/Net_SMTP/{docs/examples/basic.php,docs/guide.txt}
+%doc docs/Net_SMTP/*
 %{peardir}/*
 %{xmldir}/Net_SMTP.xml
