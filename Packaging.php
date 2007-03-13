@@ -480,14 +480,40 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $tmpdir = $this->makeTempDir();
         $instroot = $this->makeTempDir();
         
-        // Set the role prefixes - package won't actually be installed here
-        // but we can pull the proper paths back out later.
-        foreach ($this->_file_prefixes as $role => $prefix) {
-        	// if role is 'script' the corresponding option is bin_dir
-        	if ($role == 'script') $role = 'bin';
-	        $this->config->set("${role}_dir", $prefix);
+        // Save a channel object for the channel our package is part of
+        // We will need this later to stick back into the temporary
+        // installation directory
+        $chan = $reg->getChannel($pf->getChannel(), true);
+        if (PEAR::isError($chan)) {
+            $this->ui->outputData($chan->getMessage());
+            return $this->raiseError("Could not find channel data for channel '" .
+                $pf->getChannel() . " - you need to channel-discover or channel-add ".
+                "the channel before building packages based on it.");
         }
         
+        // Set the role prefixes - package won't actually be installed here
+        // but we can pull the final install paths back out later to put into
+        // our spec
+        foreach ($this->_file_prefixes as $role => $prefix) {
+            // if role is 'script' the corresponding option is bin_dir
+            if ($role == 'script') $role = 'bin';
+            
+            // save the original config options to restore later
+            $orig_config_options["${role}_dir"] = $this->config->get("${role}_dir");
+            
+            // Substitute the package name into the file prefix
+            $prefix = str_replace('%s', $pf->getPackage(), $prefix);
+            
+            // Set the temporary role prefix for installation
+            $this->config->set("${role}_dir", $prefix);
+        }
+        
+        // Construct a fake registry inside the ultimate destination
+        // temporary directory, and load the necessary channel into it
+        $regdir = $instroot . $this->config->get('php_dir');
+        $fakereg = new PEAR_Registry($regdir);
+        $fakereg->addChannel($chan);
+
         $tmp = $this->config->get('verbose');
         $this->config->set('verbose', 0);
         $installer = $this->getInstaller($this->ui);
@@ -498,22 +524,30 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $installer->setOptions(array('packagingroot' => $instroot,
                                             'nodeps' => true, 'soft' => true));
         $installer->setDownloadedPackages($params);
-        $package_info = $installer->install($source_file,
+        
+        // Don't change $params[0] below to $source_file - it's not the same
+        // any more (see $params[0] a few lines above here)
+        $package_info = $installer->install($params[0],
                                     array('packagingroot' => $instroot,
                                             'nodeps' => true, 'soft' => true));
-        
-        if (PEAR::isError($package_info)) {
+         if (PEAR::isError($package_info)) {
             $this->ui->outputData($package_info->getMessage());
             return $this->raiseError('Failed to do a temporary installation of the package');
         }
+                                            
+        // Restore the original config options
+        foreach ($orig_config_options as $key => $val) 
+        {
+            $this->config->set($key, $val);
+        }
         
-        $pkgdir = $pf->getPackage() . '-' . $pf->getVersion();
+        // Restore the original config verbosity
         $this->config->set('verbose', $tmp);
         
         // Set up some of the basic macros
         $this->_output['rpm_package'] = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkg');
         $this->_output['description'] = wordwrap($package_info['description']);
-        $this->_output['summary'] = $package_info['summary'];
+        $this->_output['summary'] = trim($package_info['summary']);
         $this->_output['possible_channel'] = $pf->getChannel();
         $this->_output['channel_alias'] = $this->_getChannelAlias($pf->getPackage(), $pf->getChannel());
         $this->_output['package'] = $pf->getPackage();
@@ -521,6 +555,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->_output['release_license'] = $pf->getLicense();
         $this->_output['release_state'] = $pf->getState();
 
+        // Remove trailing dots from summaries
+        if (substr($this->_output['summary'], -1) == '.') {
+            $this->_output['summary'] = substr($this->_output['summary'], 0, -1);
+        }
+        
         // Figure out the master server for the package's channel
         $chan = $reg->getChannel($pf->getChannel());
         $this->_output['master_server'] = $chan->getServer();
@@ -911,8 +950,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 break;
             default:
                 $reg = &$this->config->getRegistry();
-                $chan = &$reg->getChannel($chan_name);
-                $alias = $chan->getAlias();
+                $alias = $reg->channelAlias($chan_name);
+                
+                // fallback
+                if (empty($alias)) {
+                    $alias = $chan_name;
+                }
                 break;
          }
          return $alias;
