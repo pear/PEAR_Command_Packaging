@@ -530,7 +530,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $package_info = $installer->install($params[0],
                                     array('packagingroot' => $instroot,
                                             'nodeps' => true, 'soft' => true));
-         if (PEAR::isError($package_info)) {
+        if (PEAR::isError($package_info)) {
             $this->ui->outputData($package_info->getMessage());
             return $this->raiseError('Failed to do a temporary installation of the package');
         }
