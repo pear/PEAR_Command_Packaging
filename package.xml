@@ -33,10 +33,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>cellog@php.net</email>
   <active>yes</active>
  </helper> 
- <date>2007-02-17</date>
+ <date>2007-03-14</date>
  <version>
   <release>0.1.3</release>
-  <api>0.1.2</api>
+  <api>0.1.3</api>
  </version>
  <stability>
   <release>alpha</release>
@@ -46,6 +46,25 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <notes>
 - fix Bug #9932: cannot build specs from external channels [cellog]
 - fix Bug #10116: fatal error when packaging packages from other channel [cellog]
+- NEW: Can now build specs for channels as well as packages
+- Can now build specs for packages from channels other than pear.php.net (bug #9932, bug #10116, bug #10254)
+- @possible_channel@ now doesn't include a trailing slash (template.spec changed to accommodate)
+- @possible_channel@ is now filled even if channel is pecl.php.net/pear.php.net - this is part of moving towards a less pear.php.net-centric system where the core PEAR channels are not particularly "special"
+- Add the following macros:
+ - @php_files_statement@
+ - @test_files_statement@
+ - @data_files_statement@
+ - @script_files_statement@
+ - @customrole_files_statement@
+ All of these are "intelligent" in that they are empty if no files of the given type exist, plus if files do exist and are in a subdirectory dedicated to the package being RPM-ified, then make-rpm-spec will just put the top level directory in the substitution, rather than a complete file list - this makes for much shorter specs in some cases. Use of the @XXX_files_statement@ substitutions is encouraged in favour of the @files@ substitution.
+- Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
+- Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
+- Fix a bug if PEAR/PackageFile.php was already included
+- Fix bug #10327, bug #8630 - file prefixes sometimes generated incorrectly, stops some packages building
+- Add $_spec_line_format config option to allow distributors to tune the format that additional RPM headers are added to the spec in, to match their conventions
+- Internal refactoring/cleanup
+- Require PHP 4.3.0+ to avoid internal cruft
+- Tidy summaries (trim and remove trailing dots)
  </notes>
  <contents>
   <dir name="/" baseinstalldir="PEAR/Command">
@@ -86,9 +105,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
      <release>alpha</release>
      <api>alpha</api>
    </stability>
-   <date>2007-02-17</date>
+   <date>2007-03-14</date>
    <license uri="http://www.php.net/license/3_01.txt">PHP License 3.01</license>
    <notes>
+- fix Bug #9932: cannot build specs from external channels [cellog]
+- fix Bug #10116: fatal error when packaging packages from other channel [cellog]
 - NEW: Can now build specs for channels as well as packages
 - Can now build specs for packages from channels other than pear.php.net (bug #9932, bug #10116, bug #10254)
 - @possible_channel@ now doesn't include a trailing slash (template.spec changed to accommodate)
@@ -103,9 +124,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
 - Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
 - Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
 - Fix a bug if PEAR/PackageFile.php was already included
+- Fix bug #10327, bug #8630 - file prefixes sometimes generated incorrectly, stops some packages building
 - Add $_spec_line_format config option to allow distributors to tune the format that additional RPM headers are added to the spec in, to match their conventions
 - Internal refactoring/cleanup
 - Require PHP 4.3.0+ to avoid internal cruft
+- Tidy summaries (trim and remove trailing dots)
    </notes>
   </release>
   <release>
