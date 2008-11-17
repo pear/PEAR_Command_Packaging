@@ -46,7 +46,7 @@ $phpunit->assertFileExists(
 );
 
 $phpunit->assertEquals(file_get_contents(
-    'packagefiles/' . $test_spec), @file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . $output_spec),
+    dirname(__FILE__) . '/packagefiles/' . $test_spec), @file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . $output_spec),
     'Check spec file contents are correct'
 );
 

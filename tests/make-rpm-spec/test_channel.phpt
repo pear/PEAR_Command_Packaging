@@ -36,7 +36,7 @@ $phpunit->assertFileExists(
 );
 
 $phpunit->assertEquals(file_get_contents(
-    'packagefiles/test_channel.spec'), file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . 'php-channel-example.spec'),
+    dirname(__FILE__) . '/packagefiles/test_channel.spec'), file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . 'php-channel-example.spec'),
     'Check spec file contents are correct'
 );
 

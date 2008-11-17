@@ -26,7 +26,7 @@ $phpunit->showall();
 chdir($savedir);
 $phpunit->assertFileExists($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . 
     DIRECTORY_SEPARATOR . 'PEAR::Net_SMTP-1.2.8.spec', 'spec file');
-$phpunit->assertEquals(file_get_contents('packagefiles/test_option_rpm-release.spec'), file_get_contents($temp_path .
+$phpunit->assertEquals(file_get_contents(dirname(__FILE__) . '/packagefiles/test_option_rpm-release.spec'), file_get_contents($temp_path .
     DIRECTORY_SEPARATOR . 'SPECS' .
     DIRECTORY_SEPARATOR . 'PEAR::Net_SMTP-1.2.8.spec'), 'spec file contents');
 
