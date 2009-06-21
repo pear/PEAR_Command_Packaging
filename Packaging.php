@@ -70,6 +70,7 @@ are as follows:
 %C = Channel alias
 %c = Channel alias, lowercased
 %n = Channel name (full) e.g. pear.example.com
+%N = Non standard Channel name + / e.g. pear.example.com/
 
 Defaults to "%C::%s" for library/application packages and "php-channel-%c" for 
 channel packages.',
@@ -246,6 +247,13 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     
     // The name of the template spec file to use
     var $_template_spec_name = '';
+    
+    /**
+     * List of "standard" channels used by PEAR/PECL
+     * 
+     * @var array
+     */
+    var $_standard_channels = array('pear.php.net','pecl.php.net');
     
     /**
      * PEAR_Command_Packaging constructor.
@@ -443,6 +451,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->_output['possible_channel'] = $cf->getName();
         $this->_output['rpm_package'] = $this->_getRPMName(null, $cf->getName(), $cf->getAlias(), 'chan');
         
+        $rpmdep = $this->_getRPMName(null, $cf->getName(), $cf->getAlias(), 'chandep');
+        if (!empty($rpmdep) && $rpmdep != $this->_output['rpm_package']) {
+            $this->_output['extra_headers'] = $this->_formatRpmHeader('Provides', "$rpmdep") . "\n";
+        }
+            
         // Channels don't really have version numbers; this will need to be
         // hand-maintained in the spec
         $this->_output['version'] = '1.0';
@@ -651,7 +664,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // If package is not from pear.php.net or pecl.php.net, we will need
         // to BuildRequire/Require a channel RPM
-        if (!empty($this->_output['possible_channel']) && !in_array($this->_output['possible_channel'], array('pear.php.net','pecl.php.net'))) {
+        if (!empty($this->_output['possible_channel']) && !in_array($this->_output['possible_channel'], $this->_standard_channels)) {
             $channel_dep = $this->_getRPMName($this->_output['package'], $this->_output['possible_channel'], null, 'chandep');
             $this->_output['extra_headers'] .= $this->_formatRpmHeader('BuildRequires', $channel_dep) . "\n";
             $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', $channel_dep) . "\n";
@@ -1013,6 +1026,13 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // Channel name, full
         $name = str_replace('%n', $channel, $name);
 
+        // Non standard Channel name with /
+        if (empty($channel) || in_array($channel, $this->_standard_channels)) {
+	         $name = str_replace('%N', '', $name);
+        } else {
+            $name = str_replace('%N', $channel.'/', $name);
+        }
+        
         // Version
         $name = str_replace('%v', $version, $name);
         

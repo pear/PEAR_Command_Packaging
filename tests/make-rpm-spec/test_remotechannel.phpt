@@ -32,7 +32,7 @@ copy(
 
 $ret = $command->run(
     'make-rpm-spec',
-    array(),
+    array('rpm-depname'=>'php-pear(%N%s)'),
     array('../SOURCES/' . $tarball)
 );
 

@@ -10,7 +10,8 @@ Group: Development/Libraries
 Source0: http://pear.example.com/get/Test_Package-%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
 URL: http://pear.example.com/package/Test_Package
-BuildRequires: PEAR::PEAR >= 1.4.7
+BuildRequires: php-pear(PEAR) >= 1.4.7
+Provides: php-pear(pear.example.com/Test_Package) = %{version}
 BuildRequires: php-channel(pear.example.com)
 Requires: php-channel(pear.example.com)
 BuildArch: noarch

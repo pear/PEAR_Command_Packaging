@@ -1,5 +1,5 @@
 --TEST--
-make-rpm-spec command, pear package
+make-rpm-spec command, test rpm-pkgname option
 --SKIPIF--
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
