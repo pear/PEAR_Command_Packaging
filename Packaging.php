@@ -187,7 +187,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'ext' => '%{_libdir}/php',
         'test' => '%{_libdir}/php/tests/%s',
         'data' => '%{_libdir}/php/data/%s',
-        'script' => '%{_bindir}'
+        'script' => '%{_bindir}',
+        'cfg' => '%{_sysconfdir}/pear',
+        'www' => '%{_datadir}/pear/www'
     );
     
     /**
@@ -223,6 +225,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     var $_output_package = array(
         'arch_statement' => '',  // empty string, or "BuildArchitecture: noarch" if definitely a noarch package
         'bin_dir' => '',
+        'cfg_files_statement' => '', // empty string, or newline-separated list of files with "cfg" role
         'customrole_files_statement' => '',// empty string, or list of files with custom roles
         'data_dir' => '',
         'data_files_statement' => '',// empty string, or list of data files
@@ -243,6 +246,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         'summary' => '',
         'test_dir' => '',
         'test_files_statement' => '',// empty string, or list of test files
+        'www_files_statement' => '', // empty string, or newline-separated list of files with "www" role
     );
     
     // The name of the template spec file to use
@@ -579,7 +583,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->_output['master_server'] = $chan->getServer();
 
         // Put some standard PEAR config options into the output macros. These
-        // will probably be deprecated in v0.2.x
+        // will probably be deprecated in future
         $cfg = array('php_dir', 'ext_dir', 'doc_dir', 'bin_dir', 'data_dir', 'test_dir');
         foreach ($cfg as $k) {
             $this->_output[$k] = $this->config->get($k);
@@ -615,7 +619,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 $this->_output['extra_config'] .=
                     "\n        -d ${role}_dir=" . $this->_file_prefixes[$role] . "\\";
                 $this->ui->outputData("WARNING: role '$role' used, " .
-                    'and will be installed in "' . $this->_file_prefixes[$role] .
+                    'and will be installed in "' . str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]) .
                     ' - hand-edit the final .spec if this is wrong', $command);
             }
             
@@ -634,7 +638,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             // Handle other roles specially: if the role puts files in a subdir
             // dedicated to the package in question (i.e. the prefix ends with 
             // %s) we don't need to specify all the individual files
-            if (in_array($role, array('php','test','data','script'))) {
+            if (in_array($role, array('php','test','data','script','cfg','www'))) {
                 $macro_name = "${role}_files_statement";
             } else {
                 $macro_name = 'customrole_files_statement';
@@ -642,7 +646,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
             if (substr($this->_file_prefixes[$role], -2) == '%s') {
                 $this->_output[$macro_name] = str_replace('%s', $pf->getPackage(), $this->_file_prefixes[$role]);
             } else {
-                $this->_output[$macro_name] = implode("\n", $files);
+                if ($role == 'cfg') {
+                    $this->_output[$macro_name] = '%config(noreplace) ' . implode("\n%config(noreplace) ", $files);
+                } else {
+                    $this->_output[$macro_name] = implode("\n", $files);
+                }
             }
         }
         $this->_output['files'] = trim($this->_output['files']);
