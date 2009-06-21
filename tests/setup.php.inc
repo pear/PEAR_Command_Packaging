@@ -1,10 +1,89 @@
 <?php
 
-$server = 'pear.Chiara';
-//$server = 'test.pear.php.net';
+$server = 'test.fake';
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
 
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
+require_once 'PEAR.php';
+require_once 'PEAR/Frontend.php';
+class fake_log extends PEAR_Frontend
+{
+    var $_log = array();
+    var $_download = array();
+    function fake_log()
+    {
+        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = &$GLOBALS['fakelog'];
+    }
+
+    function log($level, $message)
+    {
+        $GLOBALS['fakelog']->_log[] = array($level, $message);
+    }
+
+    function outputData($info, $cmd = 'no command')
+    {
+        $GLOBALS['fakelog']->_log[] = array('info' => $info, 'cmd' => $cmd);
+    }
+
+    function _downloadCallback($msg, $params)
+    {
+        if ($msg == 'setup') {
+            $params = 'self';
+        }
+        $GLOBALS['fakelog']->_download[] = array($msg, $params);
+    }
+
+    function getLog()
+    {
+        $log = $GLOBALS['fakelog']->_log;
+        $GLOBALS['fakelog']->_log = array();
+        return $log;
+    }
+
+    function getDownload()
+    {
+        $log = $GLOBALS['fakelog']->_download;
+        $GLOBALS['fakelog']->_download = array();
+        return $log;
+    }
+
+    function setDialogOutput($input, $output)
+    {
+        $GLOBALS['fakelog']->_dialogInput[var_export($input, true)] = $output;
+    }
+
+    function userDialog()
+    {
+        $input = func_get_args();
+        if (isset($GLOBALS['fakelog']->_dialogInput[var_export($input, true)])) {
+            return $GLOBALS['fakelog']->_dialogInput[var_export($input, true)];
+        }
+    }
+}
+
+function cleanall($dir = null)
+{
+    if ($dir !== null) {
+        $statedir = $dir;
+    } else {
+        $statedir = $GLOBALS['statedir'];
+    }
+    clearstatcache();
+    if (file_exists($statedir)) {
+        $dp = opendir($statedir);
+        while ($ent = readdir($dp)) {
+            if (in_array($ent, array('.', '..'))) {
+                continue;
+            }
+            if (is_dir($statedir . DIRECTORY_SEPARATOR . $ent)) {
+                cleanall($statedir . DIRECTORY_SEPARATOR . $ent);
+                continue;
+            }
+            unlink($statedir . DIRECTORY_SEPARATOR . $ent);
+        }
+        closedir($dp);
+        rmdir($statedir);
+    }
+}
 
 cleanall($temp_path);
 $statedir = $temp_path;
@@ -73,24 +152,27 @@ if (!empty($home)) {
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
 $phpunit = &new PEAR_PHPTest(true);
 $fakelog = new fake_log;
-$config = &new test_PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');
+require_once 'PEAR/Config.php';
+$config = &new PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');
 
 require_once 'PEAR/Command/Packaging.php';
+require_once 'PEAR/PackageFile.php';
+require_once 'PEAR/Installer.php';
 class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 {
     function &getPackageFile(&$c, $d = false, $t = null)
     {
-        $a = &new test_PEAR_PackageFile($c, $d, $t);
+        $a = &new PEAR_PackageFile($c, $d, $t);
         $a->setLogger($GLOBALS['fakelog']);
         return $a;
     }
 
-    function &getInstaller()
+    /*function &getInstaller()
     {
-        $a = &new test_PEAR_Installer($this->ui);
+        $a = &new PEAR_Installer($this->ui);
         $a->setConfig($this->config);
         return $a;
-    }
+    }*/
 	
 	// this is not used at the moment as the output from the installer (featuring paths)
 	// is not examined, but may be useful in future as it provides a "known" temp
@@ -105,4 +187,3 @@ class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 }
 
 $command = &new test_PEAR_Command_Packaging($fakelog, $config);
-?>

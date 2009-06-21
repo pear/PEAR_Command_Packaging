@@ -44,7 +44,7 @@ $phpunit->assertEquals(file_get_contents(
     dirname(__FILE__) . '/packagefiles/' . $test_spec), @file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . $output_spec),
     'Check spec file contents are correct'
 );
-
+echo 'tests done';
 ?>
 --CLEAN--
 <?php
@@ -52,5 +52,3 @@ require_once dirname(dirname(__FILE__)) . '/teardown.php.inc';
 ?>
 --EXPECT--
 tests done
-
-
