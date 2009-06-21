@@ -517,6 +517,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $tmp = $this->config->get('verbose');
         $this->config->set('verbose', 0);
         $installer = $this->getInstaller($this->ui);
+        $installer->setConfig($this->config);
         require_once 'PEAR/Downloader/Package.php';
         $pack = new PEAR_Downloader_Package($installer);
         $pack->setPackageFile($pf);
