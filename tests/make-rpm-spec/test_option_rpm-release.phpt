@@ -31,7 +31,7 @@ chdir($savedir);
 $phpunit->assertFileExists($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . "PEAR::$package.spec", 'spec file');
 
 $phpunit->assertEquals(
-    file_get_contents(dirname(__FILE__) . '/packagefiles/test_option_rpm-release.spec'),
+    file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . 'test_option_rpm-release.spec'),
     file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . "PEAR::$package.spec"),
     'spec file contents'
 );
