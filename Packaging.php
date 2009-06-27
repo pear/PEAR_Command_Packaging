@@ -78,7 +78,7 @@ channel packages.',
                 'rpm-depname' => array(
                     'shortopt' => 'd',
                     'arg' => 'FORMAT',
-                    'doc' => 'Use FORMAT as format string for RPM package name. Substitutions
+                    'doc' => 'Use FORMAT as format string for naming RPM dependencies. Substitutions
 are as for the --rpm-pkgname option. Defaults to be the same as
 the format defined by the --rpm-pkgname option.',
                    ),
@@ -197,7 +197,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      * printf format. The first '%s' is the RPM header name followed by a colon,
      * the second is the header value.
      */
-    var $_spec_line_format = '%-16s%s';
+    var $_spec_line_format = '%s %s';
     
     // ------------------------------------------------------------------------
     // --- END DISTRIBUTION CONFIG
