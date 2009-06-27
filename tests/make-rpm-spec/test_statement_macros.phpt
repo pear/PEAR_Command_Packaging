@@ -21,14 +21,14 @@ mkdir($temp_path . DIRECTORY_SEPARATOR . 'SOURCES');
 mkdir($temp_path . DIRECTORY_SEPARATOR . 'SPECS');
 chdir($temp_path . DIRECTORY_SEPARATOR . 'SPECS');
 copy(
-    dirname(__FILE__) . '/packagefiles/' . $tarball, 
+    dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . $tarball, 
     $temp_path . DIRECTORY_SEPARATOR . 'SOURCES' . DIRECTORY_SEPARATOR . $tarball
 );
 
 $ret = $command->run(
     'make-rpm-spec',
     array('spec-template' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test_statement_macros.template'),
-    array('../SOURCES/' . $tarball)
+    array($temp_path . DIRECTORY_SEPARATOR . 'SOURCES' . DIRECTORY_SEPARATOR . $tarball)
 );
 
 $phpunit->assertNoErrors('Check there were no errors');
@@ -40,15 +40,16 @@ $phpunit->assertFileExists(
     'Check spec file exists'
 );
 
-$phpunit->assertEquals(file_get_contents(
-    dirname(__FILE__) . '/packagefiles/' . $test_spec), @file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . $output_spec),
+$phpunit->assertEquals(
+    file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . $test_spec),
+    @file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . $output_spec),
     'Check spec file contents are correct'
 );
 echo 'tests done';
 ?>
 --CLEAN--
 <?php
-require_once dirname(dirname(__FILE__)) . '/teardown.php.inc';
+require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'teardown.php.inc';
 ?>
 --EXPECT--
 tests done

@@ -16,14 +16,14 @@ mkdir($temp_path . DIRECTORY_SEPARATOR . 'SOURCES');
 mkdir($temp_path . DIRECTORY_SEPARATOR . 'SPECS');
 chdir($temp_path . DIRECTORY_SEPARATOR . 'SPECS');
 copy(
-    dirname(__FILE__) . '/packagefiles/channel.xml', 
+    dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . 'channel.xml', 
     $temp_path . DIRECTORY_SEPARATOR . 'SOURCES' . DIRECTORY_SEPARATOR . 'channel.xml'
 );
 
 $ret = $command->run(
     'make-rpm-spec',
     array(),
-    array('../SOURCES/channel.xml')
+    array($temp_path . DIRECTORY_SEPARATOR . 'SOURCES' . DIRECTORY_SEPARATOR . 'channel.xml')
 );
 
 $phpunit->assertNoErrors('ret 1');
@@ -35,8 +35,9 @@ $phpunit->assertFileExists(
     'Check spec file exists'
 );
 
-$phpunit->assertEquals(file_get_contents(
-    dirname(__FILE__) . '/packagefiles/test_channel.spec'), file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . 'php-channel-example.spec'),
+$phpunit->assertEquals(
+	file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . 'test_channel.spec'),
+   file_get_contents($temp_path . DIRECTORY_SEPARATOR . 'SPECS' . DIRECTORY_SEPARATOR . 'php-channel-example.spec'),
     'Check spec file contents are correct'
 );
 
@@ -44,7 +45,7 @@ echo "tests done\n";
 ?>
 --CLEAN--
 <?php
-require_once dirname(dirname(__FILE__)) . '/teardown.php.inc';
+require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'teardown.php.inc';
 ?>
 --EXPECT--
 tests done
