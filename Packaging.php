@@ -70,7 +70,7 @@ are as follows:
 %C = Channel alias
 %c = Channel alias, lowercased
 %n = Channel name (full) e.g. pear.example.com
-%N = Non standard Channel name + / e.g. pear.example.com/
+%N = Non standard channel name followed by a "/" (e.g. "pear.example.com/")
 
 Defaults to "%C::%s" for library/application packages and "php-channel-%c" for 
 channel packages.',
@@ -194,10 +194,10 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     
     /**
      * The format to use when adding new RPM header lines to the spec file, in
-     * printf format. The first '%s' is the RPM header name, the second is the
-     * value.
+     * printf format. The first '%s' is the RPM header name followed by a colon,
+     * the second is the header value.
      */
-    var $_spec_line_format = '%s: %s';
+    var $_spec_line_format = '%-16s%s';
     
     // ------------------------------------------------------------------------
     // --- END DISTRIBUTION CONFIG
@@ -383,7 +383,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      */
     function _formatRpmHeader($header, $value)
     {
-        return sprintf($this->_spec_line_format, $header, $value);
+        return sprintf($this->_spec_line_format, $header . ':', $value);
     }
     
     /**
