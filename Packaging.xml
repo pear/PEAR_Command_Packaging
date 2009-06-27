@@ -24,13 +24,15 @@ are as follows:
 %C = Channel alias
 %c = Channel alias, lowercased
 %n = Channel name (full) e.g. pear.example.com
+%N = Non standard channel name followed by a "/" (e.g. "pear.example.com/")
+
 Defaults to "%C::%s" for library/application packages and "php-channel-%c" for 
 channel packages.</doc>
    </rpm-pkgname>
    <rpm-depname>
     <shortopt>d</shortopt>
     <arg>FORMAT</arg>
-    <doc>Use FORMAT as format string for RPM package name. Substitutions
+    <doc>Use FORMAT as format string for naming RPM dependencies. Substitutions
 are as for the --rpm-pkgname option. Defaults to be the same as
 the format defined by the --rpm-pkgname option.</doc>
    </rpm-depname>
