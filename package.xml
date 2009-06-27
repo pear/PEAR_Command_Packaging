@@ -7,7 +7,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <channel>pear.php.net</channel>
  <summary>make-rpm-spec command for managing RPM .spec files for PEAR packages</summary>
  <description>
-  This command is an improved implementation of the standard makerpm command,
+  This command is an improved implementation of the standard 'makerpm' command,
   and contains several enhancements that make it far more flexible. Similar 
   functions for other external packaging mechanisms may be added at a later date.
 
@@ -33,10 +33,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>cellog@php.net</email>
   <active>yes</active>
  </helper> 
- <date>2007-03-14</date>
+ <date>2009-06-27</date>
  <version>
-  <release>0.1.3</release>
-  <api>0.1.3</api>
+  <release>0.2.0</release>
+  <api>0.2.0</api>
  </version>
  <stability>
   <release>alpha</release>
@@ -56,6 +56,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  - @data_files_statement@
  - @script_files_statement@
  - @customrole_files_statement@
+ - @cfg_files_statement@
+ - @www_files_statement@
  All of these are "intelligent" in that they are empty if no files of the given type exist, plus if files do exist and are in a subdirectory dedicated to the package being RPM-ified, then make-rpm-spec will just put the top level directory in the substitution, rather than a complete file list - this makes for much shorter specs in some cases. Use of the @XXX_files_statement@ substitutions is encouraged in favour of the @files@ substitution.
 - Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
 - Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
@@ -98,14 +100,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <changelog>
   <release>
    <version>
-    <release>0.1.3</release>
-    <api>0.1.3</api>
+    <release>0.2.0</release>
+    <api>0.2.0</api>
    </version>
    <stability>
      <release>alpha</release>
      <api>alpha</api>
    </stability>
-   <date>2007-03-14</date>
+   <date>2009-06-27</date>
    <license uri="http://www.php.net/license/3_01.txt">PHP License 3.01</license>
    <notes>
 - fix Bug #9932: cannot build specs from external channels [cellog]
@@ -120,6 +122,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  - @data_files_statement@
  - @script_files_statement@
  - @customrole_files_statement@
+ - @cfg_files_statement@
+ - @www_files_statement@
  All of these are "intelligent" in that they are empty if no files of the given type exist, plus if files do exist and are in a subdirectory dedicated to the package being RPM-ified, then make-rpm-spec will just put the top level directory in the substitution, rather than a complete file list - this makes for much shorter specs in some cases. Use of the @XXX_files_statement@ substitutions is encouraged in favour of the @files@ substitution.
 - Deprecate @rpm_xml_dir@ macro - this is pointless (replaced with actual path in the template specs)
 - Deprecate @arch@ macro - this gave invalid results; it should either be "noarch" or not defined, not the architecture of the machine building the spec file. Replaced by @arch_statement@ if you really want to use it, although the building of specs for compiled packages (i.e. PECL) is not supported at the moment, even though in theory it should work in a similar way.
