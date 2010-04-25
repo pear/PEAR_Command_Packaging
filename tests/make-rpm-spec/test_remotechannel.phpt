@@ -14,7 +14,7 @@ require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'setup.php.inc';
 // Install the pear.example.com channel file so we can build Test_Package
 require_once 'PEAR/Command/Channels.php';
 $command2 = new PEAR_Command_Channels($fakelog, $config);
-$command2->run('channel-add',array(), array('packagefiles' . DIRECTORY_SEPARATOR . 'channel.xml'));
+$command2->run('channel-add',array(), array(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'packagefiles' . DIRECTORY_SEPARATOR . 'channel.xml'));
 
 $tarball = 'Test_Package-1.1.0.tgz';
 $test_spec = 'test_remotechannel.spec';

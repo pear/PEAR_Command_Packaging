@@ -16,17 +16,17 @@ BuildArch: noarch
 
 %description
 This command is an improved implementation of the standard makerpm command,
-  and contains several enhancements that make it far more flexible.
-Similar 
-  functions for other external packaging mechanisms may be added at a
-later date.
+  and contains several enhancements that make it far more flexible. Similar
+
+  functions for other external packaging mechanisms may be added at a later
+date.
 
   Enhanced features over the original PEAR "makerpm" command include:
   
   - Ability to define a release on the command line
   - Allows more advanced customisation of the generated package name
-  - Allows virtual Provides/Requires that differ in format from the
-package name
+  - Allows virtual Provides/Requires that differ in format from the package
+name
     format 
   - tries to intelligently distinguish between PEAR and PECL when
 generating 
