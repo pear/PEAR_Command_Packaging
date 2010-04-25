@@ -8,7 +8,7 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 ?>
 --FILE--
 <?php
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED);
 require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'setup.php.inc';
 
 $tarball = 'Console_Color-1.0.2.tgz';
