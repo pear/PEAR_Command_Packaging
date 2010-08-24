@@ -958,7 +958,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 // telling between the two, but we try to make an
                 // intelligent guess: if the package name is supplied
                 // and starts with a lowercase letter, it's PECL.
-                if (ereg('^[a-z]', $package_name)) {
+                if (preg_match('/^[a-z]/', $package_name)) {
                     $alias = 'PECL';
                 } else {
                     $alias = 'PEAR';
