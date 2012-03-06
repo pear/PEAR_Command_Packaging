@@ -12,9 +12,9 @@ class PEAR_PHPTest
     {
         $this->_diffonly = $diffonly;
         $this->_errors = array();
-        PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array(&$this, 'pearerrorCallback'));
+        PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($this, 'pearerrorCallback'));
         if (!$noStackCatch) {
-            PEAR_ErrorStack::setDefaultCallback(array(&$this, 'pearerrorstackCallback'));
+            PEAR_ErrorStack::setDefaultCallback(array($this, 'pearerrorstackCallback'));
         }
     }
 
@@ -251,12 +251,12 @@ class PEAR_PHPTest
             $this->_failTest(debug_backtrace(), $message);
             if (class_exists('Text_Diff')) {
                 echo "Diff of expecting/received:\n";
-                $diff = &new Text_Diff(
+                $diff = new Text_Diff(
                     explode("\n", var_export($control, true)),
                     explode("\n", var_export($test, true)));
 
                 // Output the diff in unified format.
-                $renderer = &new Text_Diff_Renderer_unified();
+                $renderer = new Text_Diff_Renderer_unified();
                 echo $renderer->render($diff);
                 if ($this->_diffonly) {
                     return false;
@@ -294,7 +294,7 @@ class PEAR_PHPTest
         return true;
     }
 
-    function assertRegEquals($dump, &$reg, $message)
+    function assertRegEquals($dump, $reg, $message)
     {
         $actualdump = var_export(trim($this->dumpReg($reg)), true);
         $testdump = var_export(trim($dump), true);
@@ -331,12 +331,12 @@ class PEAR_PHPTest
             $this->_failTest(debug_backtrace(), $message);
             if (class_exists('Text_Diff')) {
                 echo "Diff of expecting/received:\n";
-                $diff = &new Text_Diff(
+                $diff = new Text_Diff(
                     explode("\n", var_export($control, true)),
                     explode("\n", var_export($test, true)));
 
                 // Output the diff in unified format.
-                $renderer = &new Text_Diff_Renderer_unified();
+                $renderer = new Text_Diff_Renderer_unified();
                 echo $renderer->render($diff);
                 if ($this->_diffonly) {
                     return false;
@@ -356,7 +356,7 @@ class PEAR_PHPTest
         return strnatcasecmp($a['name'], $b['name']);
     }
 
-    function dumpReg(&$reg)
+    function dumpReg($reg)
     {
         ob_start();
         print "dumping registry...\n";

@@ -31,7 +31,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <name>Greg Beaver</name>
   <user>cellog</user>
   <email>cellog@php.net</email>
-  <active>yes</active>
+  <active>no</active>
  </helper> 
  <date>2009-06-27</date>
  <version>
@@ -83,7 +83,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <dependencies>
   <required>
    <php>
-    <min>4.3</min>
+    <min>5</min>
    </php>
    <pearinstaller>
     <min>1.4.3</min>

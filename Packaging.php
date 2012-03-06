@@ -2,7 +2,7 @@
 /**
  * PEAR_Command_Packaging (make-rpm-spec commands)
  *
- * PHP versions 4 and 5
+ * PHP version 5
  *
  * LICENSE: This source file is subject to version 3.01 of the PHP license
  * that is available through the world-wide-web at the following URI:
@@ -264,7 +264,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
      *
      * @access public
      */
-    function PEAR_Command_Packaging(&$ui, &$config)
+    function PEAR_Command_Packaging($ui, $config)
     {
         parent::PEAR_Command_Common($ui, $config);
     }
@@ -272,7 +272,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     /**
      * Get a PEAR_PackageFile object based on the provided config options
      */
-    function &getPackageFile($config, $debug = false, $tmpdir = null)
+    function getPackageFile($config, $debug = false, $tmpdir = null)
     {
         if (!class_exists('PEAR_Common')) {
             require_once 'PEAR/Common.php';
@@ -280,7 +280,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         if (!class_exists('PEAR_PackageFile')) {
             require_once 'PEAR/PackageFile.php';
         }
-        $a = &new PEAR_PackageFile($config, $debug, $tmpdir);
+        $a = new PEAR_PackageFile($config, $debug, $tmpdir);
         $common = new PEAR_Common;
         $common->ui = $this->ui;
         $a->setLogger($common);
@@ -290,12 +290,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     /**
      * Abstraction for unit testing purposes
      */
-    function &getInstaller(&$ui)
+    function getInstaller($ui)
     {
         if (!class_exists('PEAR_Installer')) {
             require_once 'PEAR/Installer.php';
         }
-        $a = &new PEAR_Installer($ui);
+        $a = new PEAR_Installer($ui);
         return $a;
     }
     
@@ -477,9 +477,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     
         // Create a PEAR_PackageFile object and fill it with info from the
         // source package
-        $reg = &$this->config->getRegistry();
-        $pkg = &$this->getPackageFile($this->config, $this->_debug);
-        $pf = &$pkg->fromAnyFile($source_file, PEAR_VALIDATE_NORMAL);
+        $reg = $this->config->getRegistry();
+        $pkg = $this->getPackageFile($this->config, $this->_debug);
+        $pf = $pkg->fromAnyFile($source_file, PEAR_VALIDATE_NORMAL);
         if (PEAR::isError($pf)) {
             $u = $pf->getUserinfo();
             if (is_array($u)) {
@@ -538,7 +538,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         require_once 'PEAR/Downloader/Package.php';
         $pack = new PEAR_Downloader_Package($installer);
         $pack->setPackageFile($pf);
-        $params[0] = &$pack;
+        $params[0] = $pack;
         $installer->setOptions(array('packagingroot' => $instroot,
                                             'nodeps' => true, 'soft' => true));
         $installer->setDownloadedPackages($params);
@@ -884,10 +884,10 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     /*
      * Initialise the RPM naming options
      *
-     * @param  array &$options    Standard options array
+     * @param  array $options    Standard options array
      * @return void
      */    
-    function _initialiseNamingOptions(&$options)
+    function _initialiseNamingOptions($options)
     {
         if (isset($options['rpm-pkgname'])) {
             $this->_rpm_pkgname_format['pkg'] = $options['rpm-pkgname'];
@@ -971,7 +971,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 $alias = 'PECL';
                 break;
             default:
-                $reg = &$this->config->getRegistry();
+                $reg = $this->config->getRegistry();
                 $alias = $reg->channelAlias($chan_name);
                 
                 // fallback

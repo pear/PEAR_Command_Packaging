@@ -11,7 +11,7 @@ class fake_log extends PEAR_Frontend
     var $_download = array();
     function fake_log()
     {
-        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = &$GLOBALS['fakelog'];
+        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = $GLOBALS['fakelog'];
     }
 
     function log($level, $message)
@@ -154,26 +154,26 @@ if (!empty($home)) {
 //require_once "PEAR/ChannelFile.php";
 //require_once dirname(dirname(__FILE__)) . '/download_test_classes.php.inc';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'phpt_test.php.inc';
-$phpunit = &new PEAR_PHPTest(true);
+$phpunit = new PEAR_PHPTest(true);
 $fakelog = new fake_log;
 require_once 'PEAR/Config.php';
-$config = &new PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');
+$config = new PEAR_Config($temp_path . '/pear.ini', $temp_path . '/pear.conf');
 
 require_once 'PEAR/Command/Packaging.php';
 require_once 'PEAR/PackageFile.php';
 require_once 'PEAR/Installer.php';
 class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 {
-    function &getPackageFile(&$c, $d = false, $t = null)
+    function getPackageFile($c, $d = false, $t = null)
     {
-        $a = &new PEAR_PackageFile($c, $d, $t);
+        $a = new PEAR_PackageFile($c, $d, $t);
         $a->setLogger($GLOBALS['fakelog']);
         return $a;
     }
 
-    /*function &getInstaller()
+    /*function getInstaller()
     {
-        $a = &new PEAR_Installer($this->ui);
+        $a = new PEAR_Installer($this->ui);
         $a->setConfig($this->config);
         return $a;
     }*/
@@ -190,4 +190,4 @@ class test_PEAR_Command_Packaging extends PEAR_Command_Packaging
 	}
 }
 
-$command = &new test_PEAR_Command_Packaging($fakelog, $config);
+$command = new test_PEAR_Command_Packaging($fakelog, $config);
