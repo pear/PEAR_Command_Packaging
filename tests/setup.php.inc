@@ -11,7 +11,7 @@ class fake_log extends PEAR_Frontend
     var $_download = array();
     function fake_log()
     {
-        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = $GLOBALS['fakelog'];
+        $GLOBALS['_PEAR_FRONTEND_SINGLETON'] = &$GLOBALS['fakelog'];
     }
 
     function log($level, $message)
