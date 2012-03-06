@@ -69,9 +69,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
 - Tidy summaries (trim and remove trailing dots)
  </notes>
  <contents>
-  <dir name="/" baseinstalldir="PEAR/Command">
-   <file name="Packaging.xml" role="php"/>
-   <file name="Packaging.php" role="php">
+  <dir name="/" baseinstalldir="/">
+   <file name="PEAR/Command/Packaging.xml" role="php"/>
+   <file name="PEAR/Command/Packaging.php" role="php">
     <tasks:replace from="@DATA-DIR@" to="data_dir" type="pear-config" />
     <tasks:replace from="@package_version@" to="version" type="package-info" />
    </file>
