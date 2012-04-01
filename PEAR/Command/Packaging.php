@@ -842,14 +842,19 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         if (isset($dep['conflicts'])) {
                             $conflicts[] = $package;
                         } else {
-                            $requires[$package] = $package;
+                            $requires[] = $package;
                         }
                     } else {
                         if (isset($dep['min'])) {
-                            $requires[$package] = $package . ' >= ' . $dep['min'];
+                            $requires[] = $package . ' >= ' . $dep['min'];
                         }
                         if (isset($dep['max'])) {
-                            $requires[$package] = $package . ' <= ' . $dep['max'];
+                            if (isset($dep['exclude']) && !is_array($dep['exclude']) && $dep['exclude']=$dep['max']) {
+                                $requires[] = $package . ' < ' . $dep['max'];
+                                unset($dep['exclude']);
+                            } else {
+                                $requires[] = $package . ' <= ' . $dep['max'];
+                            }
                         }
                         if (isset($dep['exclude'])) {
                             $ex = $dep['exclude'];
@@ -874,7 +879,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         $deps['required']['pearinstaller']['min'];
                 }
                 if (count($requires)) {
-                    $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', implode(', ', $requires)) . "\n";
+                    foreach($requires as $req) {
+                        $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', $req) . "\n";
+                    }
                 }
                 if (count($conflicts)) {
                     $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', $conflicts)) . "\n";
