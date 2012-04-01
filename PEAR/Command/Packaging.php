@@ -729,20 +729,20 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 if ($dep['rel'] == 'has') {
                     // We use $package as the index to the $requires array to de-duplicate deps.
                     // Note that in the case of duplicate deps, versioned deps will "win" - see several lines down.
-                    $requires[$package] = $package;
+                    $requires[] = $package;
                 } elseif ($dep['rel'] == 'not') {
                     $conflicts[] = $package;
                 } elseif ($dep['rel'] == 'ne') {
                     $conflicts[] = $package . ' = ' . $dep['version'];
                 } elseif (isset($trans[$dep['rel']])) {
-                    $requires[$package] = $package . ' ' . $trans[$dep['rel']] . ' ' . $dep['version'];
+                    $requires[] = $package . ' ' . $trans[$dep['rel']] . ' ' . $dep['version'];
                 }
             }
             if (count($requires)) {
-                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', implode(', ', $requires)) . "\n";
+                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', implode(', ', array_unique($requires))) . "\n";
             }
             if (count($conflicts)) {
-                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', $conflicts)) . "\n";
+                $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', array_unique($conflicts))) . "\n";
             }
         } else {
             $this->_output['package2xml'] = '2'; // tell the spec to use package2.xml
@@ -879,12 +879,12 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                         $deps['required']['pearinstaller']['min'];
                 }
                 if (count($requires)) {
-                    foreach($requires as $req) {
+                    foreach(array_unique($requires) as $req) {
                         $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', $req) . "\n";
                     }
                 }
                 if (count($conflicts)) {
-                    $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', $conflicts)) . "\n";
+                    $this->_output['extra_headers'] .= $this->_formatRpmHeader('Conflicts', implode(', ', array_unique($conflicts))) . "\n";
                 }
             }
         }
