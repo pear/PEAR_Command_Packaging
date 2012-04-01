@@ -353,7 +353,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         if (isset($options['spec-template'])) {
             $spec_template = $options['spec-template'];
         } else {
-            $spec_template = '@DATA-DIR@/PEAR_Command_Packaging/' . $this->_template_spec_name;
+            if (file_exists('@DATA-DIR@/PEAR_Command_Packaging/')) {
+                $spec_template = '@DATA-DIR@/PEAR_Command_Packaging/' . $this->_template_spec_name;
+            } else {
+                $spec_template = dirname(dirname(dirname(__FILE__))) . '/' . $this->_template_spec_name;
+            }
         }
         
         // Open the template spec file
