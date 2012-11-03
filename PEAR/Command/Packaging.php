@@ -531,8 +531,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Construct a fake registry inside the ultimate destination
         // temporary directory, and load the necessary channel into it
-        $regdir = $instroot . $this->config->get('php_dir');
-        $fakereg = new PEAR_Registry($regdir);
+        $phpdir = $instroot . $this->config->get('php_dir');
+        $regdir = $instroot . $this->config->get('metadata_dir');
+        $fakereg = new PEAR_Registry($phpdir, false, false, $regdir);
         $fakereg->addChannel($chan);
 
         $tmp = $this->config->get('verbose');
