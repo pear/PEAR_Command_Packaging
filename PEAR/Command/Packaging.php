@@ -512,6 +512,9 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
                 "the channel before building packages based on it.");
         }
         
+        $phpdir = $instroot . $this->config->get('php_dir');
+        $regdir = $instroot . $this->config->get('metadata_dir');
+
         // Set the role prefixes - package won't actually be installed here
         // but we can pull the final install paths back out later to put into
         // our spec
@@ -531,8 +534,6 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         
         // Construct a fake registry inside the ultimate destination
         // temporary directory, and load the necessary channel into it
-        $phpdir = $instroot . $this->config->get('php_dir');
-        $regdir = $instroot . $this->config->get('metadata_dir');
         $fakereg = new PEAR_Registry($phpdir, false, false, $regdir);
         $fakereg->addChannel($chan);
 
@@ -568,11 +569,11 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         $this->config->set('verbose', $tmp);
         
         // Set up some of the basic macros
-        $this->_output['rpm_package'] = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkg');
+        $this->_output['rpm_package'] = $this->_getRPMName($pf->getPackage(), $chan->getName(), $chan->getAlias(), 'pkg');
         $this->_output['description'] = wordwrap($package_info['description']);
         $this->_output['summary'] = trim($package_info['summary']);
-        $this->_output['possible_channel'] = $pf->getChannel();
-        $this->_output['channel_alias'] = $this->_getChannelAlias($pf->getPackage(), $pf->getChannel());
+        $this->_output['possible_channel'] = $chan->getName();
+        $this->_output['channel_alias'] = $chan->getAlias();
         $this->_output['package'] = $pf->getPackage();
         $this->_output['version'] = $pf->getVersion();
         $this->_output['release_license'] = $pf->getLicense();
@@ -601,7 +602,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
     
         // Hook to support virtual Provides, where the dependency name differs
         // from the package name
-        $rpmdep = $this->_getRPMName($pf->getPackage(), $pf->getChannel(), null, 'pkgdep');
+        $rpmdep = $this->_getRPMName($pf->getPackage(), $chan->getName(), $chan->getAlias(), 'pkgdep');
         if (!empty($rpmdep) && $rpmdep != $this->_output['rpm_package']) {
             $this->_output['extra_headers'] .= $this->_formatRpmHeader('Provides', "$rpmdep = %{version}") . "\n";
         }
@@ -678,7 +679,7 @@ Wrote: /path/to/rpm-build-tree/RPMS/noarch/PEAR::Net_Socket-1.0-1.noarch.rpm
         // If package is not from pear.php.net or pecl.php.net, we will need
         // to BuildRequire/Require a channel RPM
         if (!empty($this->_output['possible_channel']) && !in_array($this->_output['possible_channel'], $this->_standard_channels)) {
-            $channel_dep = $this->_getRPMName($this->_output['package'], $this->_output['possible_channel'], null, 'chandep');
+            $channel_dep = $this->_getRPMName($this->_output['package'], $this->_output['possible_channel'], $this->_output['channel_alias'], 'chandep');
             $this->_output['extra_headers'] .= $this->_formatRpmHeader('BuildRequires', $channel_dep) . "\n";
             $this->_output['extra_headers'] .= $this->_formatRpmHeader('Requires', $channel_dep) . "\n";
         }
