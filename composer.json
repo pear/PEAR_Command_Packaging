@@ -1,0 +1,36 @@
+{
+    "authors": [
+        {
+            "email": "tim@timj.co.uk",
+            "name": "Tim Jackson",
+            "role": "Lead"
+        },
+        {
+            "email": "cellog@php.net",
+            "name": "Greg Beaver",
+            "role": "Helper"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "PEAR_Command_Packaging": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/PEAR_Command_Packaging",
+    "include-path": [
+        "./"
+    ],
+    "license": "PHP License 3.01",
+    "name": "pear/pear_command_packaging",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=PEAR_Command_Packaging",
+        "source": "https://github.com/pear/PEAR_Command_Packaging"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
